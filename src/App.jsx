@@ -19,10 +19,25 @@ function App() {
   const [simulationResult, setSimulationResult] = useState(null);
   const [metrics, setMetrics] = useState(null);
 
-  // ⏱️ RR time quantum (UI will come later)
-  const TIME_QUANTUM = 2;
+  // ⏱️ RR time quantum (controlled from ProcessForm)
+  const [timeQuantum, setTimeQuantum] = useState(2);
+
+  // ❌ Form error (duplicate PID, etc.)
+  const [formError, setFormError] = useState("");
 
   const handleAddProcess = (rawProcess) => {
+    // 🔒 Duplicate PID check (case-insensitive)
+    const pidExists = processes.some(
+      (p) => p.id.trim().toLowerCase() === rawProcess.id.trim().toLowerCase()
+    );
+
+    if (pidExists) {
+      setFormError(`Process ID "${rawProcess.id}" already exists.`);
+      return;
+    }
+
+    setFormError(""); // clear previous error
+
     const newProcess = createProcess({
       id: rawProcess.id,
       arrivalTime: rawProcess.arrivalTime,
@@ -45,6 +60,7 @@ function App() {
     setProcesses([]);
     setSimulationResult(null);
     setMetrics(null);
+    setFormError("");
   };
 
   // 🚀 MAIN SIMULATION DISPATCHER
@@ -79,7 +95,7 @@ function App() {
         break;
 
       case "RR":
-        result = roundRobinScheduler(processes, TIME_QUANTUM);
+        result = roundRobinScheduler(processes, timeQuantum);
         break;
 
       default:
@@ -88,15 +104,8 @@ function App() {
     }
 
     const computedMetrics = computeMetrics(result);
-
     setSimulationResult(result);
     setMetrics(computedMetrics);
-
-    // Debug (optional)
-    console.log("Algorithm:", selectedAlgorithm);
-    console.log("Timeline:", result.timeline);
-    console.log("Processes:", result.processes);
-    console.log("Metrics:", computedMetrics);
   };
 
   return (
@@ -118,6 +127,8 @@ function App() {
           <ProcessForm
             onAddProcess={handleAddProcess}
             selectedAlgorithm={selectedAlgorithm}
+            onSetTimeQuantum={setTimeQuantum}
+            error={formError}
           />
         </div>
 

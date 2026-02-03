@@ -1,8 +1,13 @@
 import { useState } from "react";
 
-function ProcessForm({ onAddProcess, selectedAlgorithm }) {
-
-    const isPriorityAlgo = selectedAlgorithm === "Priority";
+function ProcessForm({
+  onAddProcess,
+  selectedAlgorithm,
+  onSetTimeQuantum,
+  error,
+}) {
+  const isPriorityAlgo = selectedAlgorithm === "Priority";
+  const isRR = selectedAlgorithm === "RR";
 
   const [pid, setPid] = useState("");
   const [arrivalTime, setArrivalTime] = useState("");
@@ -13,7 +18,6 @@ function ProcessForm({ onAddProcess, selectedAlgorithm }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // In this step, we only pass raw data upward
     onAddProcess({
       id: pid,
       arrivalTime,
@@ -33,9 +37,14 @@ function ProcessForm({ onAddProcess, selectedAlgorithm }) {
       onSubmit={handleSubmit}
       className="space-y-6 bg-slate-900 p-6 rounded-xl shadow-lg"
     >
-      <h2 className="text-xl font-bold text-slate-100">
-        Add Process
-      </h2>
+      <h2 className="text-xl font-bold text-slate-100">Add Process</h2>
+
+      {/* Error Message */}
+      {error && (
+        <div className="rounded-md bg-red-500/10 border border-red-500/30 px-4 py-2 text-sm text-red-400 font-semibold">
+          {error}
+        </div>
+      )}
 
       {/* Process ID */}
       <div>
@@ -81,23 +90,38 @@ function ProcessForm({ onAddProcess, selectedAlgorithm }) {
         />
       </div>
 
-     {/* Priority (only for Priority Scheduling) */}
-        {isPriorityAlgo && (
+      {/* Priority */}
+      {isPriorityAlgo && (
         <div>
-            <label className="block text-sm text-slate-300 mb-1">
+          <label className="block text-sm text-slate-300 mb-1">
             Priority
-            </label>
-            <input
+          </label>
+          <input
             type="number"
             min="0"
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
             placeholder="Lower number = higher priority"
             className="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+          />
         </div>
-        )}
+      )}
 
+      {/* Time Quantum */}
+      {isRR && (
+        <div>
+          <label className="block text-sm text-slate-300 mb-1">
+            Time Quantum
+          </label>
+          <input
+            type="number"
+            min="1"
+            placeholder="2"
+            onChange={(e) => onSetTimeQuantum(Number(e.target.value))}
+            className="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+        </div>
+      )}
 
       {/* Color Picker */}
       <div className="flex items-center gap-4">
