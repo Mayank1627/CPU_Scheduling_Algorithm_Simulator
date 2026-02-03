@@ -113,12 +113,12 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col items-center py-10 px-4">
-      <h1 className="text-3xl font-extrabold text-slate-800 mb-8 text-center text-yellow-400">
+    <div className="min-h-screen bg-gray-600 flex flex-col items-center py-10 px-4">
+      <h1 className="text-3xl font-extrabold  mb-8 text-center ">
         CPU Scheduling Algorithm Simulator
       </h1>
 
-      <div className="w-full max-w-6xl px-10 py-10 rounded-lg space-y-10 bg-gray-300">
+      <div className="w-full max-w-6xl px-10 py-10 rounded-lg space-y-10 bg-gray-600">
 
         {/* Top Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
