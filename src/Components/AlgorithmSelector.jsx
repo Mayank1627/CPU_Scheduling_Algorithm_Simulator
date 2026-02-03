@@ -73,21 +73,21 @@ function AlgorithmSelector({ selected, onSelect }) {
       <div
         onClick={() => setOpen(!open)}
         className="
-      cursor-pointer mt-4 rounded-xl bg-blue-600 px-6 py-5 text-center
-      shadow-xl hover:shadow-2xl hover:bg-slate-700
+      cursor-pointer mt-4 rounded-xl bg-blue-400 px-6 py-5 text-center
+      shadow-xl hover:shadow-2xl hover:bg-blue-600 
       ring-1 ring-slate-700 transition-all 
     ">
-        <p className="text-lg font-semibold text-gray-400">
+        <p className="text-lg font-semibold text-black">
           {selectedAlgo ? "Selected Algorithm" : "Select Scheduling Algorithm"}
         </p>
 
           {selectedAlgo && (
       <div className="mt-4 text-left">
-        <p className="text-2xl font-extrabold text-gray-100 text-center">
+        <p className="text-2xl font-extrabold text-gray-900 text-center">
           {selectedAlgo.fullName}
         </p>
 
-        <ul className="mt-4 space-y-2 text-m text-gray-200 list-disc list-inside">
+        <ul className="mt-4 space-y-2 text-m text-black font-semibold list-disc list-inside">
           {selectedAlgo.details.map((point, index) => (
             <li key={index}>{point}</li>
           ))}

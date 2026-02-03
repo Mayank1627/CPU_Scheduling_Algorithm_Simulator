@@ -1,6 +1,9 @@
 import { useState } from "react";
 
-function ProcessForm({ onAddProcess }) {
+function ProcessForm({ onAddProcess, selectedAlgorithm }) {
+
+    const isPriorityAlgo = selectedAlgorithm === "Priority";
+
   const [pid, setPid] = useState("");
   const [arrivalTime, setArrivalTime] = useState("");
   const [burstTime, setBurstTime] = useState("");
@@ -78,20 +81,23 @@ function ProcessForm({ onAddProcess }) {
         />
       </div>
 
-      {/* Priority (optional) */}
-      <div>
-        <label className="block text-sm text-slate-300 mb-1">
-          Priority (optional)
-        </label>
-        <input
-          type="number"
-          min="0"
-          value={priority}
-          onChange={(e) => setPriority(e.target.value)}
-          placeholder="1"
-          className="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
+     {/* Priority (only for Priority Scheduling) */}
+        {isPriorityAlgo && (
+        <div>
+            <label className="block text-sm text-slate-300 mb-1">
+            Priority
+            </label>
+            <input
+            type="number"
+            min="0"
+            value={priority}
+            onChange={(e) => setPriority(e.target.value)}
+            placeholder="Lower number = higher priority"
+            className="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+        </div>
+        )}
+
 
       {/* Color Picker */}
       <div className="flex items-center gap-4">

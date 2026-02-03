@@ -5,20 +5,24 @@ import ProcessTable from "./components/ProcessTable";
 import { createProcess } from "./core/processModel";
 
 function App() {
-  const [selectedAlgorithm, setSelectedAlgorithm] = useState(null);
-  const [processes, setProcesses] = useState([]);
+    const [selectedAlgorithm, setSelectedAlgorithm] = useState(null);
+    const [processes, setProcesses] = useState([]);
 
-  const handleAddProcess = (rawProcess) => {
-    const newProcess = createProcess({
-      id: rawProcess.id,
-      arrivalTime: rawProcess.arrivalTime,
-      burstTime: rawProcess.burstTime,
-      priority: rawProcess.priority || null,
-      color: rawProcess.color,
-    });
+      const handleAddProcess = (rawProcess) => {
+          const newProcess = createProcess({
+            id: rawProcess.id,
+            arrivalTime: rawProcess.arrivalTime,
+            burstTime: rawProcess.burstTime,
+            priority:
+              selectedAlgorithm === "Priority"
+                ? rawProcess.priority
+                : null,
+            color: rawProcess.color,
+          });
 
-    setProcesses((prev) => [...prev, newProcess]);
+        setProcesses((prev) => [...prev, newProcess]);
   };
+
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col items-center py-10 px-4">
@@ -37,7 +41,10 @@ function App() {
             />
           </div>
 
-          <ProcessForm onAddProcess={handleAddProcess} />
+          <ProcessForm
+          onAddProcess={handleAddProcess}
+          selectedAlgorithm={selectedAlgorithm}
+        />
         </div>
 
         {/* Process Table */}
