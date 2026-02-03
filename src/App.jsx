@@ -114,11 +114,12 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col items-center py-10 px-4">
-      <h1 className="text-3xl font-extrabold text-slate-800 mb-8 text-center">
+      <h1 className="text-3xl font-extrabold text-slate-800 mb-8 text-center text-yellow-400">
         CPU Scheduling Algorithm Simulator
       </h1>
 
-      <div className="w-full max-w-6xl px-4 pt-4 rounded-lg space-y-10 bg-gray-300">
+      <div className="w-full max-w-6xl px-10 py-10 rounded-lg space-y-10 bg-gray-300">
+
         {/* Top Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-gray-900 p-6 rounded-xl shadow-xl flex items-center justify-center">
@@ -136,6 +137,17 @@ function App() {
           />
         </div>
 
+        {/* Simulate Button */}
+        <div className="text-center">
+          <button
+            onClick={handleSimulate}
+            className="px-10 py-4 text-lg rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 transition"
+          >
+            Simulate 
+            Algorithm
+          </button>
+        </div>
+
         {/* Process Input Table */}
         <ProcessTable
           processes={processes}
@@ -143,15 +155,7 @@ function App() {
           onClearAll={handleClearAll}
         />
 
-        {/* Simulate Button */}
-        <div className="text-center">
-          <button
-            onClick={handleSimulate}
-            className="px-8 py-3 rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 transition"
-          >
-            Simulate
-          </button>
-        </div>
+        
 
         
 

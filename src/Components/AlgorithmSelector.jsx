@@ -73,11 +73,11 @@ function AlgorithmSelector({ selected, onSelect }) {
       <div
         onClick={() => setOpen(!open)}
         className="
-      cursor-pointer mt-4 rounded-xl bg-blue-400 px-6 py-5 text-center
-      shadow-xl hover:shadow-2xl hover:bg-blue-600 
+      cursor-pointer mt-4 rounded-xl bg-blue-600 px-6 py-5 text-center
+      shadow-xl hover:shadow-2xl hover:bg-blue-400 
       ring-1 ring-slate-700 transition-all 
     ">
-        <p className="text-lg font-semibold text-black">
+        <p className="text-lg font-semibold text-white">
           {selectedAlgo ? "Selected Algorithm" : "Select Scheduling Algorithm"}
         </p>
 
