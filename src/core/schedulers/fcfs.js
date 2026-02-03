@@ -42,8 +42,20 @@ export function fcfsScheduler(processes) {
     proc.remainingTime = 0;
   }
 
-  return createSimulationResult({
-    timeline,
-    processes: procList,
-  });
+ const finalizedProcesses = processes.map((p) => {
+  const turnaroundTime = p.completionTime - p.arrivalTime;
+  const waitingTime = turnaroundTime - p.burstTime;
+
+  return {
+    ...p,
+    turnaroundTime,
+    waitingTime,
+  };
+});
+
+return {
+  timeline,
+  processes: finalizedProcesses,
+};
+
 }

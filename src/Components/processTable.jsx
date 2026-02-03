@@ -11,7 +11,7 @@ function ProcessTable({ processes, onDeleteProcess, onClearAll }) {
     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
       {/* Header */}
       <div className="px-6 py-4 bg-gray-600 flex justify-between items-center">
-        <h2 className="text-lg font-bold text-white">
+        <h2 className="text-lg font-bold text-white ml-[45%]">
           Process List
         </h2>
 
