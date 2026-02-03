@@ -2,6 +2,7 @@ import { useState } from "react";
 import AlgorithmSelector from "./components/AlgorithmSelector";
 import ProcessForm from "./components/ProcessForm";
 import ProcessTable from "./components/ProcessTable";
+import GanttChart from "./components/GanttChart"; // ✅ ADDED
 import { createProcess } from "./core/processModel";
 
 import { fcfsScheduler } from "./core/schedulers/fcfs";
@@ -19,14 +20,10 @@ function App() {
   const [simulationResult, setSimulationResult] = useState(null);
   const [metrics, setMetrics] = useState(null);
 
-  // ⏱️ RR time quantum (controlled from ProcessForm)
   const [timeQuantum, setTimeQuantum] = useState(2);
-
-  // ❌ Form error (duplicate PID, etc.)
   const [formError, setFormError] = useState("");
 
   const handleAddProcess = (rawProcess) => {
-    // 🔒 Duplicate PID check (case-insensitive)
     const pidExists = processes.some(
       (p) => p.id.trim().toLowerCase() === rawProcess.id.trim().toLowerCase()
     );
@@ -36,7 +33,7 @@ function App() {
       return;
     }
 
-    setFormError(""); // clear previous error
+    setFormError("");
 
     const newProcess = createProcess({
       id: rawProcess.id,
@@ -63,7 +60,6 @@ function App() {
     setFormError("");
   };
 
-  // 🚀 MAIN SIMULATION DISPATCHER
   const handleSimulate = () => {
     if (!selectedAlgorithm) {
       alert("Please select a scheduling algorithm.");
@@ -81,23 +77,18 @@ function App() {
       case "FCFS":
         result = fcfsScheduler(processes);
         break;
-
       case "SJF":
         result = sjfScheduler(processes);
         break;
-
       case "Priority":
         result = priorityScheduler(processes);
         break;
-
       case "SRTF":
         result = srtfScheduler(processes);
         break;
-
       case "RR":
         result = roundRobinScheduler(processes, timeQuantum);
         break;
-
       default:
         alert("Unsupported algorithm selected.");
         return;
@@ -115,7 +106,6 @@ function App() {
       </h1>
 
       <div className="w-full max-w-6xl px-4 pt-4 rounded-lg space-y-10 bg-gray-300">
-        {/* Top section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-gray-900 p-6 rounded-xl shadow-xl flex items-center justify-center">
             <AlgorithmSelector
@@ -132,14 +122,12 @@ function App() {
           />
         </div>
 
-        {/* Process Table */}
         <ProcessTable
           processes={processes}
           onDeleteProcess={handleDeleteProcess}
           onClearAll={handleClearAll}
         />
 
-        {/* Simulate Button */}
         <div className="text-center">
           <button
             onClick={handleSimulate}
@@ -149,7 +137,6 @@ function App() {
           </button>
         </div>
 
-        {/* Metrics */}
         {metrics && (
           <div className="bg-slate-800 rounded-xl p-8 shadow-xl space-y-8">
             <h2 className="text-2xl font-extrabold text-center text-slate-100">
@@ -194,6 +181,11 @@ function App() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Gantt Chart */}
+        {simulationResult && (
+          <GanttChart timeline={simulationResult.timeline} />
         )}
       </div>
     </div>
