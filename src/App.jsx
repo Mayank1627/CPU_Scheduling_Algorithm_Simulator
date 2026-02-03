@@ -153,6 +153,18 @@ function App() {
           </button>
         </div>
 
+        
+
+        {/* Gantt Chart */}
+        {simulationResult && (
+          <GanttChart timeline={simulationResult.timeline} />
+        )}
+
+        {/* Per-Process Statistics */}
+        {simulationResult && (
+          <ProcessStatsTable processes={simulationResult.processes} />
+        )}
+
         {/* Metrics */}
         {metrics && (
           <div className="bg-slate-800 rounded-xl p-8 shadow-xl space-y-8">
@@ -200,15 +212,6 @@ function App() {
           </div>
         )}
 
-        {/* Gantt Chart */}
-        {simulationResult && (
-          <GanttChart timeline={simulationResult.timeline} />
-        )}
-
-        {/* Per-Process Statistics */}
-        {simulationResult && (
-          <ProcessStatsTable processes={simulationResult.processes} />
-        )}
       </div>
     </div>
   );
