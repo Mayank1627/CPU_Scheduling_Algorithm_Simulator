@@ -1,9 +1,9 @@
-import { createTimelineBlock, createSimulationResult } from "../simulationTypes";
+import { createTimelineBlock } from "../simulationTypes";
 
 // First Come First Serve Scheduling
 export function fcfsScheduler(processes) {
-  // Defensive copy (never mutate original input)
-  const procList = processes.map(p => ({ ...p }));
+  // Defensive copy
+  const procList = processes.map((p) => ({ ...p }));
 
   // Sort by arrival time
   procList.sort((a, b) => a.arrivalTime - b.arrivalTime);
@@ -12,22 +12,20 @@ export function fcfsScheduler(processes) {
   let currentTime = 0;
 
   for (const proc of procList) {
-    // CPU idle if process arrives later
+    // CPU idle
     if (currentTime < proc.arrivalTime) {
       timeline.push(
         createTimelineBlock({
           pid: "IDLE",
           start: currentTime,
           end: proc.arrivalTime,
-          color: "#9ca3af", // gray for idle
+          color: "#9ca3af",
         })
       );
       currentTime = proc.arrivalTime;
     }
 
-    // Process starts execution
-    proc.startTime = currentTime;
-
+    // Execute process
     timeline.push(
       createTimelineBlock({
         pid: proc.id,
@@ -38,24 +36,31 @@ export function fcfsScheduler(processes) {
     );
 
     currentTime += proc.burstTime;
-    proc.completionTime = currentTime;
-    proc.remainingTime = 0;
   }
 
- const finalizedProcesses = processes.map((p) => {
-  const turnaroundTime = p.completionTime - p.arrivalTime;
-  const waitingTime = turnaroundTime - p.burstTime;
+  // ✅ FIX: derive completion time from timeline
+  const completionMap = {};
+  timeline.forEach((block) => {
+    if (block.pid !== "IDLE") {
+      completionMap[block.pid] = block.end; // last execution wins
+    }
+  });
+
+  const finalizedProcesses = procList.map((p) => {
+    const completionTime = completionMap[p.id];
+    const turnaroundTime = completionTime - p.arrivalTime;
+    const waitingTime = turnaroundTime - p.burstTime;
+
+    return {
+      ...p,
+      completionTime,
+      turnaroundTime,
+      waitingTime,
+    };
+  });
 
   return {
-    ...p,
-    turnaroundTime,
-    waitingTime,
+    timeline,
+    processes: finalizedProcesses,
   };
-});
-
-return {
-  timeline,
-  processes: finalizedProcesses,
-};
-
 }
