@@ -1,3 +1,4 @@
+
 function ProcessTable({ processes }) {
   if (processes.length === 0) {
     return (

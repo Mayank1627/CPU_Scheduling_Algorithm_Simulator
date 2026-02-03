@@ -1,13 +1,13 @@
 import { useState } from "react";
 import AlgorithmSelector from "./components/AlgorithmSelector";
 import ProcessForm from "./components/ProcessForm";
+import ProcessTable from "./components/ProcessTable";
 import { createProcess } from "./core/processModel";
 
 function App() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState(null);
   const [processes, setProcesses] = useState([]);
 
-  // Handle adding a process from the form
   const handleAddProcess = (rawProcess) => {
     const newProcess = createProcess({
       id: rawProcess.id,
@@ -27,25 +27,21 @@ function App() {
         CPU Scheduling Algorithm Simulator
       </h1>
 
-      <div className="w-full max-w-xl space-y-8">
-        {/* Algorithm Selector */}
-        <div className="bg-white p-8 rounded-xl shadow-md">
-          <AlgorithmSelector
-            selected={selectedAlgorithm}
-            onSelect={setSelectedAlgorithm}
-          />
+      <div className="w-full max-w-6xl px-4 pt-4 rounded-lg space-y-10 bg-gray-300">
+        {/* Top section: Algorithm + Process Form */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-gray-900 p-6 rounded-xl shadow-xl flex items-center justify-center">
+            <AlgorithmSelector
+              selected={selectedAlgorithm}
+              onSelect={setSelectedAlgorithm}
+            />
+          </div>
+
+          <ProcessForm onAddProcess={handleAddProcess} />
         </div>
 
-        {/* Process Form */}
-        <ProcessForm onAddProcess={handleAddProcess} />
-
-        {/* Debug Output (temporary) */}
-        <div className="bg-white p-4 rounded-md shadow text-sm text-slate-700">
-          <p className="font-semibold mb-2">Processes (debug):</p>
-          <pre className="overflow-x-auto">
-            {JSON.stringify(processes, null, 2)}
-          </pre>
-        </div>
+        {/* Process Table */}
+        <ProcessTable processes={processes} />
       </div>
     </div>
   );
