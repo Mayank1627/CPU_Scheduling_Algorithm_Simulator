@@ -9,7 +9,7 @@ const ALGORITHMS = [
 function AlgorithmSelector({ selected, onSelect }) {
   return (
     <div>
-        
+
       <h2 className="text-lg font-semibold text-slate-800 mb-3">
         Select Scheduling Algorithm
       </h2>
