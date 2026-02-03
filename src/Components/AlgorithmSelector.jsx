@@ -77,7 +77,7 @@ function AlgorithmSelector({ selected, onSelect }) {
       shadow-xl hover:shadow-2xl hover:bg-slate-700
       ring-1 ring-slate-700 transition-all 
     ">
-        <p className="text-lg font-semibold text-gray-300">
+        <p className="text-lg font-semibold text-gray-400">
           {selectedAlgo ? "Selected Algorithm" : "Select Scheduling Algorithm"}
         </p>
 
@@ -87,7 +87,7 @@ function AlgorithmSelector({ selected, onSelect }) {
           {selectedAlgo.fullName}
         </p>
 
-        <ul className="mt-4 space-y-2 text-sm text-gray-200 list-disc list-inside">
+        <ul className="mt-4 space-y-2 text-m text-gray-200 list-disc list-inside">
           {selectedAlgo.details.map((point, index) => (
             <li key={index}>{point}</li>
           ))}
