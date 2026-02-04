@@ -98,15 +98,18 @@ Duration: ${block.end - block.start}`}
                   y2={AXIS_Y + 6}
                   stroke="#e5e7eb"
                 />
-                <text
+               <text
                   x={x}
                   y={LABEL_Y}
-                  fill="#e5e7eb"
-                  fontSize="12"
+                  fill="#07f2f2"
+                  fontSize="14"
+                  fontWeight="bold"
                   textAnchor="middle"
                 >
                   {t}
                 </text>
+
+                 
               </g>
             );
           })}

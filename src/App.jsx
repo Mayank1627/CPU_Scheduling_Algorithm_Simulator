@@ -4,6 +4,7 @@ import ProcessForm from "./components/ProcessForm";
 import ProcessTable from "./components/ProcessTable";
 import GanttChart from "./components/GanttChart";
 import ProcessStatsTable from "./components/ProcessStatsTable";
+import ComparisonTable from "./components/ComparisonTable";
 
 import { createProcess } from "./core/processModel";
 
@@ -22,10 +23,11 @@ function App() {
   const [simulationResult, setSimulationResult] = useState(null);
   const [metrics, setMetrics] = useState(null);
 
+  const [comparisonResults, setComparisonResults] = useState(null);
+
   const [timeQuantum, setTimeQuantum] = useState(2);
   const [formError, setFormError] = useState("");
 
-  // ➕ Add process (ALWAYS through createProcess)
   const handleAddProcess = (rawProcess) => {
     const pidExists = processes.some(
       (p) => p.id.trim().toLowerCase() === rawProcess.id.trim().toLowerCase()
@@ -60,23 +62,12 @@ function App() {
     setProcesses([]);
     setSimulationResult(null);
     setMetrics(null);
+    setComparisonResults(null);
     setFormError("");
   };
 
-  // 🚀 Run simulation (IMPORTANT: fresh copy per run)
-  const handleSimulate = () => {
-    if (!selectedAlgorithm) {
-      alert("Please select a scheduling algorithm.");
-      return;
-    }
-
-    if (processes.length === 0) {
-      alert("Add at least one process before simulation.");
-      return;
-    }
-
-    // recreate processes to avoid state leakage
-    const freshProcesses = processes.map((p) =>
+  const recreateProcesses = () =>
+    processes.map((p) =>
       createProcess({
         id: p.id,
         arrivalTime: p.arrivalTime,
@@ -86,36 +77,62 @@ function App() {
       })
     );
 
+  const handleSimulate = () => {
+    if (!selectedAlgorithm || processes.length === 0) return;
+
+    const freshProcesses = recreateProcesses();
     let result;
 
     switch (selectedAlgorithm) {
       case "FCFS":
         result = fcfsScheduler(freshProcesses);
         break;
-
       case "SJF":
         result = sjfScheduler(freshProcesses);
         break;
-
       case "Priority":
         result = priorityScheduler(freshProcesses);
         break;
-
       case "SRTF":
         result = srtfScheduler(freshProcesses);
         break;
-
       case "RR":
         result = roundRobinScheduler(freshProcesses, timeQuantum);
         break;
-
       default:
-        alert("Unsupported algorithm selected.");
         return;
     }
 
     setSimulationResult(result);
     setMetrics(computeMetrics(result));
+    setComparisonResults(null);
+  };
+
+  const handleCompareAll = () => {
+    if (processes.length === 0) return;
+
+    const algorithms = [
+      { id: "FCFS", run: fcfsScheduler },
+      { id: "SJF", run: sjfScheduler },
+      { id: "SRTF", run: srtfScheduler },
+      { id: "RR", run: (p) => roundRobinScheduler(p, timeQuantum) },
+      { id: "Priority", run: priorityScheduler },
+    ];
+
+    const results = algorithms.map(({ id, run }) => {
+      const fresh = recreateProcesses();
+      const result = run(fresh);
+      const metrics = computeMetrics(result);
+
+      return {
+        algorithm: id,
+        ...metrics,
+      };
+    });
+
+    setComparisonResults(results);
+    setSimulationResult(null);
+    setMetrics(null);
   };
 
   return (
@@ -125,7 +142,6 @@ function App() {
       </h1>
 
       <div className="w-full max-w-6xl px-10 py-10 rounded-lg space-y-10 bg-gray-600">
-        {/* Top Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-gray-900 p-6 rounded-xl shadow-xl flex items-center justify-center">
             <AlgorithmSelector
@@ -142,34 +158,35 @@ function App() {
           />
         </div>
 
-        {/* Simulate Button */}
-        <div className="text-center">
+        <div className="flex justify-center gap-6">
           <button
             onClick={handleSimulate}
             className="px-10 py-4 text-lg rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 transition"
           >
             Simulate Algorithm
           </button>
+
+          <button
+            onClick={handleCompareAll}
+            className="px-10 py-4 text-lg rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition"
+          >
+            Compare All Algorithms
+          </button>
         </div>
 
-        {/* Process List */}
         <ProcessTable
           processes={processes}
           onDeleteProcess={handleDeleteProcess}
           onClearAll={handleClearAll}
         />
 
-        {/* Gantt Chart */}
         {simulationResult && (
-          <GanttChart timeline={simulationResult.timeline} />
+          <>
+            <GanttChart timeline={simulationResult.timeline} />
+            <ProcessStatsTable processes={simulationResult.processes} />
+          </>
         )}
 
-        {/* Per-Process Statistics */}
-        {simulationResult && (
-          <ProcessStatsTable processes={simulationResult.processes} />
-        )}
-
-        {/* Metrics */}
         {metrics && (
           <div className="bg-slate-800 rounded-xl p-8 shadow-xl space-y-8">
             <h2 className="text-2xl font-extrabold text-center text-slate-100">
@@ -214,6 +231,10 @@ function App() {
               </div>
             </div>
           </div>
+        )}
+
+        {comparisonResults && (
+          <ComparisonTable results={comparisonResults} />
         )}
       </div>
     </div>
