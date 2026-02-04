@@ -21,7 +21,7 @@ const totalTime = timeline[timeline.length - 1].end - timeline[0].start;
 
   return (
     <div className="bg-slate-900 p-6 rounded-xl shadow-lg">
-      <h2 className="text-xl font-bold text-slate-100 mb-4 text-center">
+      <h2 className="text-3xl font-bold font-[monospace] text-slate-100 mb-4 text-center">
         Gantt Chart
       </h2>
 

@@ -202,6 +202,14 @@ function App() {
           </div>
         )}
 
+        {/* GANTT CHART */}
+        {simulationResult && (
+          <div className="w-full">
+            <GanttChart timeline={simulationResult.timeline} />
+          </div>
+        )}
+
+
         {/* METRICS */}
         {metrics && (
           <div className="w-full bg-slate-800 rounded-xl p-10 shadow-xl space-y-8">
