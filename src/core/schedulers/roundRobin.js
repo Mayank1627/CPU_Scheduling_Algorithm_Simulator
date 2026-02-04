@@ -1,4 +1,4 @@
-import { createTimelineBlock } from "../simulationTypes";
+import { createTimelineBlock } from "../simulationTypes.js";
 
 // Round Robin Scheduling (Preemptive)
 export function roundRobinScheduler(processes, timeQuantum = 2) {

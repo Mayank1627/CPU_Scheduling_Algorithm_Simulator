@@ -1,4 +1,4 @@
-import { createTimelineBlock } from "../simulationTypes";
+import { createTimelineBlock } from "../simulationTypes.js";
 
 // Shortest Remaining Time First (Preemptive)
 export function srtfScheduler(processes) {

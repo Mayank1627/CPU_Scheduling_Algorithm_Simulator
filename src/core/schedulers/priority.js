@@ -1,4 +1,4 @@
-import { createTimelineBlock } from "../simulationTypes";
+import { createTimelineBlock } from "../simulationTypes.js";
 
 // Priority Scheduling (Non-Preemptive)
 // Lower priority number = higher priority

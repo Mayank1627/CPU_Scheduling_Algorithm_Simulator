@@ -1,4 +1,4 @@
-import { createTimelineBlock } from "../simulationTypes";
+import { createTimelineBlock } from "../simulationTypes.js";
 
 export function fcfsScheduler(processes) {
   const procList = processes.map((p) => ({

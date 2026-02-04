@@ -1,4 +1,4 @@
-import { createTimelineBlock } from "../simulationTypes";
+import { createTimelineBlock } from "../simulationTypes.js";
 
 // Shortest Job First (Non-Preemptive)
 export function sjfScheduler(processes) {

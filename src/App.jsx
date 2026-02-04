@@ -1,20 +1,21 @@
 import { useState } from "react";
-import AlgorithmSelector from "./components/AlgorithmSelector";
-import ProcessForm from "./components/ProcessForm";
-import ProcessTable from "./components/ProcessTable";
-import GanttChart from "./components/GanttChart";
-import ProcessStatsTable from "./components/ProcessStatsTable";
-import ComparisonTable from "./components/ComparisonTable";
+import AlgorithmSelector from "./components/AlgorithmSelector.jsx";
+import ProcessForm from "./components/ProcessForm.jsx";
+import ProcessTable from "./components/ProcessTable.jsx";
+import GanttChart from "./components/GanttChart.jsx";
+import ProcessStatsTable from "./components/ProcessStatsTable.jsx";
+import ComparisonTable from "./components/ComparisonTable.jsx";
+
 
 import { createProcess } from "./core/processModel";
 
-import { fcfsScheduler } from "./core/schedulers/fcfs";
-import { sjfScheduler } from "./core/schedulers/sjf";
-import { priorityScheduler } from "./core/schedulers/priority";
-import { srtfScheduler } from "./core/schedulers/srtf";
-import { roundRobinScheduler } from "./core/schedulers/roundRobin";
+import { fcfsScheduler } from "./core/schedulers/fcfs.js";
+import { sjfScheduler } from "./core/schedulers/sjf.js";
+import { priorityScheduler } from "./core/schedulers/priority.js";
+import { srtfScheduler } from "./core/schedulers/srtf.js";
+import { roundRobinScheduler } from "./core/schedulers/roundRobin.js";
 
-import { computeMetrics } from "./core/metrics";
+import { computeMetrics } from "./core/metrics.js";
 
 function App() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState(null);
