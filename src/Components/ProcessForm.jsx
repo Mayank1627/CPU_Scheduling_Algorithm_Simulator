@@ -18,11 +18,16 @@ function ProcessForm({
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // basic validation (hard stop on bad input)
+    if (!pid || arrivalTime === "" || burstTime === "") return;
+    if (Number(arrivalTime) < 0) return;
+    if (Number(burstTime) <= 0) return;
+
     onAddProcess({
       id: pid,
-      arrivalTime,
-      burstTime,
-      priority,
+      arrivalTime: Number(arrivalTime),
+      burstTime: Number(burstTime),
+      priority: isPriorityAlgo ? Number(priority) : null,
       color,
     });
 
@@ -39,7 +44,6 @@ function ProcessForm({
     >
       <h2 className="text-xl font-bold text-slate-100">Add Process</h2>
 
-      {/* Error Message */}
       {error && (
         <div className="rounded-md bg-red-500/10 border border-red-500/30 px-4 py-2 text-sm text-red-400 font-semibold">
           {error}
@@ -117,7 +121,12 @@ function ProcessForm({
             type="number"
             min="1"
             placeholder="2"
-            onChange={(e) => onSetTimeQuantum(Number(e.target.value))}
+            onChange={(e) => {
+              const value = Number(e.target.value);
+              if (value > 0) {
+                onSetTimeQuantum(value);
+              }
+            }}
             className="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
         </div>

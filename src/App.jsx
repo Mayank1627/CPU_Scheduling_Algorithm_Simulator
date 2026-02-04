@@ -4,6 +4,7 @@ import ProcessForm from "./components/ProcessForm";
 import ProcessTable from "./components/ProcessTable";
 import GanttChart from "./components/GanttChart";
 import ProcessStatsTable from "./components/ProcessStatsTable";
+
 import { createProcess } from "./core/processModel";
 
 import { fcfsScheduler } from "./core/schedulers/fcfs";
@@ -21,13 +22,10 @@ function App() {
   const [simulationResult, setSimulationResult] = useState(null);
   const [metrics, setMetrics] = useState(null);
 
-  // ⏱️ Round Robin time quantum
   const [timeQuantum, setTimeQuantum] = useState(2);
-
-  // ❌ Form-level error (duplicate PID, etc.)
   const [formError, setFormError] = useState("");
 
-  // ➕ Add process
+  // ➕ Add process (ALWAYS through createProcess)
   const handleAddProcess = (rawProcess) => {
     const pidExists = processes.some(
       (p) => p.id.trim().toLowerCase() === rawProcess.id.trim().toLowerCase()
@@ -54,12 +52,10 @@ function App() {
     setProcesses((prev) => [...prev, newProcess]);
   };
 
-  // ❌ Delete process
   const handleDeleteProcess = (pid) => {
     setProcesses((prev) => prev.filter((p) => p.id !== pid));
   };
 
-  // 🧹 Clear all
   const handleClearAll = () => {
     setProcesses([]);
     setSimulationResult(null);
@@ -67,7 +63,7 @@ function App() {
     setFormError("");
   };
 
-  // 🚀 Run simulation
+  // 🚀 Run simulation (IMPORTANT: fresh copy per run)
   const handleSimulate = () => {
     if (!selectedAlgorithm) {
       alert("Please select a scheduling algorithm.");
@@ -79,27 +75,38 @@ function App() {
       return;
     }
 
+    // recreate processes to avoid state leakage
+    const freshProcesses = processes.map((p) =>
+      createProcess({
+        id: p.id,
+        arrivalTime: p.arrivalTime,
+        burstTime: p.burstTime,
+        priority: p.priority,
+        color: p.color,
+      })
+    );
+
     let result;
 
     switch (selectedAlgorithm) {
       case "FCFS":
-        result = fcfsScheduler(processes);
+        result = fcfsScheduler(freshProcesses);
         break;
 
       case "SJF":
-        result = sjfScheduler(processes);
+        result = sjfScheduler(freshProcesses);
         break;
 
       case "Priority":
-        result = priorityScheduler(processes);
+        result = priorityScheduler(freshProcesses);
         break;
 
       case "SRTF":
-        result = srtfScheduler(processes);
+        result = srtfScheduler(freshProcesses);
         break;
 
       case "RR":
-        result = roundRobinScheduler(processes, timeQuantum);
+        result = roundRobinScheduler(freshProcesses, timeQuantum);
         break;
 
       default:
@@ -107,19 +114,17 @@ function App() {
         return;
     }
 
-    const computedMetrics = computeMetrics(result);
     setSimulationResult(result);
-    setMetrics(computedMetrics);
+    setMetrics(computeMetrics(result));
   };
 
   return (
     <div className="min-h-screen bg-gray-600 flex flex-col items-center py-10 px-4">
-      <h1 className="text-3xl font-extrabold  mb-8 text-center ">
+      <h1 className="text-3xl font-extrabold mb-8 text-center">
         CPU Scheduling Algorithm Simulator
       </h1>
 
       <div className="w-full max-w-6xl px-10 py-10 rounded-lg space-y-10 bg-gray-600">
-
         {/* Top Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-gray-900 p-6 rounded-xl shadow-xl flex items-center justify-center">
@@ -143,21 +148,16 @@ function App() {
             onClick={handleSimulate}
             className="px-10 py-4 text-lg rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 transition"
           >
-            Simulate 
-            Algorithm
+            Simulate Algorithm
           </button>
         </div>
 
-        {/* Process Input Table */}
+        {/* Process List */}
         <ProcessTable
           processes={processes}
           onDeleteProcess={handleDeleteProcess}
           onClearAll={handleClearAll}
         />
-
-        
-
-        
 
         {/* Gantt Chart */}
         {simulationResult && (
@@ -215,7 +215,6 @@ function App() {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

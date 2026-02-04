@@ -3,7 +3,7 @@ function GanttChart({ timeline }) {
     return null;
   }
 
-  const totalTime = timeline[timeline.length - 1].end;
+const totalTime = timeline[timeline.length - 1].end - timeline[0].start;
 
   // Layout constants
   const SVG_BASE_WIDTH = 900;

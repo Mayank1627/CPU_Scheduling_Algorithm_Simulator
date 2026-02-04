@@ -5,7 +5,6 @@ export function computeMetrics({ timeline, processes }) {
   let totalTurnaroundTime = 0;
   let totalWaitingTime = 0;
 
-  // Compute per-process metrics
   const perProcess = processes.map((p) => {
     const turnaroundTime = p.completionTime - p.arrivalTime;
     const waitingTime = turnaroundTime - p.burstTime;
@@ -23,11 +22,11 @@ export function computeMetrics({ timeline, processes }) {
     };
   });
 
-  // Total simulation time
   const totalTime =
-    timeline.length > 0 ? timeline[timeline.length - 1].end : 0;
+    timeline.length > 0
+      ? timeline[timeline.length - 1].end - timeline[0].start
+      : 0;
 
-  // CPU busy time (exclude IDLE)
   const busyTime = timeline
     .filter((block) => block.pid !== "IDLE")
     .reduce((sum, block) => sum + (block.end - block.start), 0);
@@ -45,10 +44,10 @@ export function computeMetrics({ timeline, processes }) {
     totalTime === 0 ? 0 : n / totalTime;
 
   return {
-    perProcess,                 // array of per-process stats
+    perProcess,
     averageWaitingTime,
     averageTurnaroundTime,
-    cpuUtilization,             // percentage
-    throughput,                 // processes per unit time
+    cpuUtilization,
+    throughput,
   };
 }
