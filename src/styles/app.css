@@ -6,11 +6,15 @@
 /* Global base styles */
 html,
 body {
-  background-color: #0f172a; /* slate-900 */
-  font-family: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
-  letter-spacing: -0.015em;
+  min-height: 100%;
+  background-color: #e5e7eb; /* light gray background */
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.12) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
+
+
 
 /* Headings – bold, tight, confident */
 h1,
