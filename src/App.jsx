@@ -22,7 +22,6 @@ function App() {
 
   const [simulationResult, setSimulationResult] = useState(null);
   const [metrics, setMetrics] = useState(null);
-
   const [comparisonResults, setComparisonResults] = useState(null);
 
   const [timeQuantum, setTimeQuantum] = useState(2);
@@ -32,7 +31,6 @@ function App() {
     const pidExists = processes.some(
       (p) => p.id.trim().toLowerCase() === rawProcess.id.trim().toLowerCase()
     );
-
     if (pidExists) {
       setFormError(`Process ID "${rawProcess.id}" already exists.`);
       return;
@@ -80,24 +78,24 @@ function App() {
   const handleSimulate = () => {
     if (!selectedAlgorithm || processes.length === 0) return;
 
-    const freshProcesses = recreateProcesses();
+    const fresh = recreateProcesses();
     let result;
 
     switch (selectedAlgorithm) {
       case "FCFS":
-        result = fcfsScheduler(freshProcesses);
+        result = fcfsScheduler(fresh);
         break;
       case "SJF":
-        result = sjfScheduler(freshProcesses);
+        result = sjfScheduler(fresh);
         break;
       case "Priority":
-        result = priorityScheduler(freshProcesses);
+        result = priorityScheduler(fresh);
         break;
       case "SRTF":
-        result = srtfScheduler(freshProcesses);
+        result = srtfScheduler(fresh);
         break;
       case "RR":
-        result = roundRobinScheduler(freshProcesses, timeQuantum);
+        result = roundRobinScheduler(fresh, timeQuantum);
         break;
       default:
         return;
@@ -123,11 +121,7 @@ function App() {
       const fresh = recreateProcesses();
       const result = run(fresh);
       const metrics = computeMetrics(result);
-
-      return {
-        algorithm: id,
-        ...metrics,
-      };
+      return { algorithm: id, ...metrics };
     });
 
     setComparisonResults(results);
@@ -136,14 +130,15 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-600 flex flex-col items-center py-10 px-4">
-      <h1 className="text-3xl font-extrabold mb-8 text-center">
+    <div className="min-h-screen bg-gray-600 py-10 px-6">
+      <h1 className="text-3xl font-extrabold mb-10 text-center">
         CPU Scheduling Algorithm Simulator
       </h1>
 
-      <div className="w-full max-w-6xl px-10 py-10 rounded-lg space-y-10 bg-gray-600">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-gray-900 p-6 rounded-xl shadow-xl flex items-center justify-center">
+      <div className="w-full max-w-[1600px] mx-auto space-y-12">
+        {/* Top Section */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
+          <div className="bg-gray-900 p-8 rounded-xl shadow-xl flex items-center justify-center">
             <AlgorithmSelector
               selected={selectedAlgorithm}
               onSelect={setSelectedAlgorithm}
@@ -158,74 +153,85 @@ function App() {
           />
         </div>
 
-        <div className="flex justify-center gap-6">
+        {/* Buttons */}
+        <div className="flex justify-center gap-8">
           <button
             onClick={handleSimulate}
-            className="px-10 py-4 text-lg rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 transition"
+            className="px-12 py-4 text-lg rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 transition"
           >
             Simulate Algorithm
           </button>
 
           <button
             onClick={handleCompareAll}
-            className="px-10 py-4 text-lg rounded-lg bg-amber-500 text-white font-bold hover:bg-amber-600 transition"
+            className="px-12 py-4 text-lg rounded-lg bg-amber-500 text-white font-bold hover:bg-yellow-700 transition"
           >
             Compare All Algorithms
           </button>
         </div>
 
-        <ProcessTable
-          processes={processes}
-          onDeleteProcess={handleDeleteProcess}
-          onClearAll={handleClearAll}
-        />
-
-        {simulationResult && (
-          <>
-            <GanttChart timeline={simulationResult.timeline} />
+        {/* PROCESS TABLE / PER-PROCESS STATS LOGIC */}
+        {!simulationResult || comparisonResults ? (
+          <div className="flex justify-center">
+            <div className="w-full xl:w-1/2">
+              <ProcessTable
+                processes={processes}
+                onDeleteProcess={handleDeleteProcess}
+                onClearAll={handleClearAll}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-10 items-start">
+            <ProcessTable
+              processes={processes}
+              onDeleteProcess={handleDeleteProcess}
+              onClearAll={handleClearAll}
+            />
             <ProcessStatsTable processes={simulationResult.processes} />
-          </>
+          </div>
         )}
 
+        {/* METRICS */}
         {metrics && (
-          <div className="bg-slate-800 rounded-xl p-8 shadow-xl space-y-8">
+          <div className="w-full bg-slate-800 rounded-xl p-10 shadow-xl space-y-8">
             <h2 className="text-2xl font-extrabold text-center text-slate-100">
               Simulation Metrics ({selectedAlgorithm})
             </h2>
 
-            <div className="flex flex-col md:flex-row gap-6 justify-between">
-              <div className="flex-1 bg-slate-900 rounded-lg p-6 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
+              <div className="bg-slate-900 rounded-lg p-8 text-center">
                 <p className="text-sm uppercase tracking-wide text-slate-400">
                   Avg Waiting Time
                 </p>
-                <p className="mt-2 text-3xl font-extrabold text-slate-100">
+                <p className="mt-3 text-4xl font-extrabold text-slate-100">
                   {metrics.averageWaitingTime.toFixed(2)}
                 </p>
               </div>
 
-              <div className="flex-1 bg-slate-900 rounded-lg p-6 text-center">
+              <div className="bg-slate-900 rounded-lg p-8 text-center">
                 <p className="text-sm uppercase tracking-wide text-slate-400">
                   Avg Turnaround Time
                 </p>
-                <p className="mt-2 text-3xl font-extrabold text-slate-100">
+                <p className="mt-3 text-4xl font-extrabold text-slate-100">
                   {metrics.averageTurnaroundTime.toFixed(2)}
                 </p>
               </div>
 
-              <div className="flex-1 bg-slate-900 rounded-lg p-6 text-center">
+              <div className="bg-slate-900 rounded-lg p-8 text-center">
                 <p className="text-sm uppercase tracking-wide text-slate-400">
                   CPU Utilization
                 </p>
-                <p className="mt-2 text-3xl font-extrabold text-slate-100">
+                <p className="mt-3 text-4xl font-extrabold text-slate-100">
                   {metrics.cpuUtilization.toFixed(2)}%
                 </p>
               </div>
 
-              <div className="flex-1 bg-slate-900 rounded-lg p-6 text-center">
+              <div className="bg-slate-900 rounded-lg p-8 text-center">
                 <p className="text-sm uppercase tracking-wide text-slate-400">
                   Throughput
                 </p>
-                <p className="mt-2 text-3xl font-extrabold text-slate-100">
+                <p className="mt-3 text-4xl font-extrabold text-slate-100">
                   {metrics.throughput.toFixed(4)}
                 </p>
               </div>
@@ -233,8 +239,11 @@ function App() {
           </div>
         )}
 
+        {/* COMPARISON */}
         {comparisonResults && (
-          <ComparisonTable results={comparisonResults} />
+          <div className="w-full">
+            <ComparisonTable results={comparisonResults} />
+          </div>
         )}
       </div>
     </div>

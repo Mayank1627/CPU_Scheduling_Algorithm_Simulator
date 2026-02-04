@@ -5,14 +5,14 @@ function ProcessStatsTable({ processes }) {
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-      <div className="px-6 py-4 bg-slate-700">
-        <h2 className="text-lg font-bold text-white text-center">
+      <div className="px-6 py-5 bg-slate-700 ">
+        <h2 className="text-lg font-bold  text-white text-center">
           Per-Process Statistics
         </h2>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto pb-2">
+        <table className="w-full text-m ">
           <thead className="bg-slate-800 text-slate-100">
             <tr>
               <th className="px-6 py-3 text-left">PID</th>

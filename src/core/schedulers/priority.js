@@ -35,7 +35,7 @@ export function priorityScheduler(processes) {
           pid: "IDLE",
           start: currentTime,
           end: nextArrival,
-          color: "#9ca3af",
+          color: "#ffffff",
         })
       );
 

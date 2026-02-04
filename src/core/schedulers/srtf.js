@@ -32,7 +32,7 @@ export function srtfScheduler(processes) {
               end: currentTime,
               color:
                 lastPid === "IDLE"
-                  ? "#9ca3af"
+                  ? "#ffffff"
                   : procList.find((p) => p.id === lastPid).color,
             })
           );
@@ -60,7 +60,7 @@ export function srtfScheduler(processes) {
             end: currentTime,
             color:
               lastPid === "IDLE"
-                ? "#9ca3af"
+                ? "#ffffff"
                 : procList.find((p) => p.id === lastPid).color,
           })
         );
@@ -86,7 +86,7 @@ export function srtfScheduler(processes) {
         end: currentTime,
         color:
           lastPid === "IDLE"
-            ? "#9ca3af"
+            ? "#ffffff"
             : procList.find((p) => p.id === lastPid).color,
       })
     );

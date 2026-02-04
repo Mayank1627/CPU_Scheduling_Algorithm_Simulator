@@ -20,7 +20,7 @@ export function fcfsScheduler(processes) {
           pid: "IDLE",
           start: currentTime,
           end: proc.arrivalTime,
-          color: "#9ca3af",
+          color: "#ffffff",
         })
       );
       currentTime = proc.arrivalTime;
