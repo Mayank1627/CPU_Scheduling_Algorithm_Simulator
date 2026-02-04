@@ -12,7 +12,7 @@ function ComparisonTable({ results }) {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-m">
           <thead className="bg-slate-800 text-slate-100">
             <tr>
               <th className="px-6 py-3 text-left font-semibold">Algorithm</th>
@@ -31,7 +31,7 @@ function ComparisonTable({ results }) {
             </tr>
           </thead>
 
-          <tbody>
+          <tbody className = "text-lg">
             {results.map((r) => (
               <tr
                 key={r.algorithm}

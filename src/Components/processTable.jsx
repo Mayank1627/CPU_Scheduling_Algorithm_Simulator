@@ -10,7 +10,7 @@ function ProcessTable({ processes, onDeleteProcess, onClearAll }) {
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 bg-gray-600 flex justify-between items-center">
+      <div className="px-6 py-4 bg-slate-700 flex justify-between items-center">
         <h2 className="text-lg font-bold text-white ml-[45%]">
           Process List
         </h2>
@@ -26,7 +26,7 @@ function ProcessTable({ processes, onDeleteProcess, onClearAll }) {
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-m">
-          <thead className="bg-slate-700 text-slate-100">
+          <thead className="bg-slate-800 text-slate-100">
             <tr>
               <th className="px-6 py-3 text-left font-semibold">PID</th>
               <th className="px-6 py-3 text-left font-semibold">Arrival</th>

@@ -168,7 +168,7 @@ function App() {
 
           <button
             onClick={handleCompareAll}
-            className="px-10 py-4 text-lg rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition"
+            className="px-10 py-4 text-lg rounded-lg bg-amber-500 text-white font-bold hover:bg-amber-600 transition"
           >
             Compare All Algorithms
           </button>
