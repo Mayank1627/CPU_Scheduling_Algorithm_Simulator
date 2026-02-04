@@ -5,6 +5,8 @@ export function srtfScheduler(processes) {
   const procList = processes.map((p) => ({
     ...p,
     remainingTime: p.burstTime,
+    startTime: null,
+    completionTime: null,
   }));
 
   const timeline = [];
@@ -20,7 +22,6 @@ export function srtfScheduler(processes) {
       (p) => p.arrivalTime <= currentTime && p.remainingTime > 0
     );
 
-    // CPU idle
     if (available.length === 0) {
       if (lastPid !== "IDLE") {
         if (lastPid !== null) {
@@ -43,11 +44,13 @@ export function srtfScheduler(processes) {
       continue;
     }
 
-    // Pick process with shortest remaining time
     available.sort((a, b) => a.remainingTime - b.remainingTime);
     const currentProc = available[0];
 
-    // Context switch
+    if (currentProc.startTime === null) {
+      currentProc.startTime = currentTime;
+    }
+
     if (lastPid !== currentProc.id) {
       if (lastPid !== null) {
         timeline.push(
@@ -66,16 +69,15 @@ export function srtfScheduler(processes) {
       blockStart = currentTime;
     }
 
-    // Execute for 1 unit
     currentProc.remainingTime--;
     currentTime++;
 
     if (currentProc.remainingTime === 0) {
+      currentProc.completionTime = currentTime;
       completed++;
     }
   }
 
-  // Close last block
   if (lastPid !== null) {
     timeline.push(
       createTimelineBlock({
@@ -90,22 +92,12 @@ export function srtfScheduler(processes) {
     );
   }
 
-  // ✅ FIX: derive completion time from timeline
-  const completionMap = {};
-  timeline.forEach((block) => {
-    if (block.pid !== "IDLE") {
-      completionMap[block.pid] = block.end; // last execution wins
-    }
-  });
-
   const finalizedProcesses = procList.map((p) => {
-    const completionTime = completionMap[p.id];
-    const turnaroundTime = completionTime - p.arrivalTime;
+    const turnaroundTime = p.completionTime - p.arrivalTime;
     const waitingTime = turnaroundTime - p.burstTime;
 
     return {
       ...p,
-      completionTime,
       turnaroundTime,
       waitingTime,
     };

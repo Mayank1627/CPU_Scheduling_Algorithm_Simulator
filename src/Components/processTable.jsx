@@ -33,7 +33,7 @@ function ProcessTable({ processes, onDeleteProcess, onClearAll }) {
               <th className="px-6 py-3 text-left font-semibold">Burst</th>
               <th className="px-6 py-3 text-left font-semibold">Priority</th>
               <th className="px-6 py-3 text-left font-semibold">Color</th>
-              <th className="px-6 py-3 text-right font-semibold">Action</th>
+              <th className="px-6 py-3 text-right font-semibold"></th>
             </tr>
           </thead>
 

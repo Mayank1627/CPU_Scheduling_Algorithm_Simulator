@@ -1,7 +1,6 @@
-//  process factory for the simulator to simulate different process
+// process factory for the simulator
 
-export function createProcess(
-    {
+export function createProcess({
   id,
   arrivalTime,
   burstTime,
@@ -9,14 +8,15 @@ export function createProcess(
   color,
 }) {
   return {
-    id,                     // e.g. P1, P2
+    id,                                   // e.g. P1, P2
     arrivalTime: Number(arrivalTime),
     burstTime: Number(burstTime),
-    remainingTime: Number(burstTime), // used in preemptive algorithms
-    priority,                        // used in Priority scheduling
-    color,                          // for Gantt chart visualization
+    originalBurstTime: Number(burstTime), // immutable reference
+    remainingTime: Number(burstTime),     // used in preemptive algorithms
+    priority: priority !== null ? Number(priority) : null,
+    color,                                // for Gantt chart visualization
 
-    // For simulation Part
+    // Simulation results
     startTime: null,
     completionTime: null,
   };

@@ -3,24 +3,26 @@ import { createTimelineBlock } from "../simulationTypes";
 // Priority Scheduling (Non-Preemptive)
 // Lower priority number = higher priority
 export function priorityScheduler(processes) {
-  // Defensive copy
-  const procList = processes.map((p) => ({ ...p }));
-  const timeline = [];
+  const procList = processes.map((p) => ({
+    ...p,
+    remainingTime: p.burstTime,
+    startTime: null,
+    completionTime: null,
+  }));
 
+  const timeline = [];
   let currentTime = 0;
   let completed = 0;
   const n = procList.length;
   const isCompleted = new Set();
 
   while (completed < n) {
-    // Available processes
     const available = procList.filter(
       (p) =>
         !isCompleted.has(p.id) &&
         p.arrivalTime <= currentTime
     );
 
-    // CPU idle
     if (available.length === 0) {
       const nextArrival = Math.min(
         ...procList
@@ -41,9 +43,18 @@ export function priorityScheduler(processes) {
       continue;
     }
 
-    // Select highest priority (lowest number)
-    available.sort((a, b) => a.priority - b.priority);
+    available.sort((a, b) => {
+      if (a.priority === null && b.priority === null) return 0;
+      if (a.priority === null) return 1;
+      if (b.priority === null) return -1;
+      return a.priority - b.priority;
+    });
+
     const proc = available[0];
+
+    if (proc.startTime === null) {
+      proc.startTime = currentTime;
+    }
 
     timeline.push(
       createTimelineBlock({
@@ -55,26 +66,17 @@ export function priorityScheduler(processes) {
     );
 
     currentTime += proc.burstTime;
+    proc.completionTime = currentTime;
     isCompleted.add(proc.id);
     completed++;
   }
 
-  // ✅ FIX: derive completion time from timeline
-  const completionMap = {};
-  timeline.forEach((block) => {
-    if (block.pid !== "IDLE") {
-      completionMap[block.pid] = block.end;
-    }
-  });
-
   const finalizedProcesses = procList.map((p) => {
-    const completionTime = completionMap[p.id];
-    const turnaroundTime = completionTime - p.arrivalTime;
+    const turnaroundTime = p.completionTime - p.arrivalTime;
     const waitingTime = turnaroundTime - p.burstTime;
 
     return {
       ...p,
-      completionTime,
       turnaroundTime,
       waitingTime,
     };
