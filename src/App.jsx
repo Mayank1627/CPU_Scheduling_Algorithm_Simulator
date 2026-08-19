@@ -7,7 +7,7 @@ import ProcessStatsTable from "./components/ProcessStatsTable.jsx";
 import ComparisonTable from "./components/ComparisonTable.jsx";
 
 
-import { createProcess } from "./core/processModel";
+import { createProcess } from "./core/processModel.js";
 
 import { fcfsScheduler } from "./core/schedulers/fcfs.js";
 import { sjfScheduler } from "./core/schedulers/sjf.js";
