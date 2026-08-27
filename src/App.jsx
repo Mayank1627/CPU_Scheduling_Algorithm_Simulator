@@ -27,6 +27,21 @@ function App() {
 
   const [timeQuantum, setTimeQuantum] = useState(2);
   const [formError, setFormError] = useState("");
+  const [noAlgorithmError, setNoAlgorithmError] = useState(false);
+
+  const handleSelectAlgorithm = (algo) => {
+    setSelectedAlgorithm(algo);
+    setNoAlgorithmError(false);
+
+    // Priority & RR need extra fields (priority / time quantum) that
+    // previously-added processes won't have, so clear them.
+    if ((algo === "Priority" || algo === "RR") && processes.length > 0) {
+      setProcesses([]);
+      setSimulationResult(null);
+      setMetrics(null);
+      setComparisonResults(null);
+    }
+  };
 
   const handleAddProcess = (rawProcess) => {
     const pidExists = processes.some(
@@ -63,6 +78,7 @@ function App() {
     setMetrics(null);
     setComparisonResults(null);
     setFormError("");
+    setNoAlgorithmError(false);
   };
 
   const recreateProcesses = () =>
@@ -77,7 +93,15 @@ function App() {
     );
 
   const handleSimulate = () => {
-    if (!selectedAlgorithm || processes.length === 0) return;
+    if (!selectedAlgorithm) {
+      if (processes.length > 0) {
+        setNoAlgorithmError(true);
+      }
+      return;
+    }
+    if (processes.length === 0) return;
+
+    setNoAlgorithmError(false);
 
     const fresh = recreateProcesses();
     let result;
@@ -109,6 +133,8 @@ function App() {
 
   const handleCompareAll = () => {
     if (processes.length === 0) return;
+
+    setNoAlgorithmError(false);
 
     const algorithms = [
       { id: "FCFS", run: fcfsScheduler },
@@ -151,7 +177,7 @@ function App() {
           <div className="bg-gray-900 p-8 rounded-xl shadow-xl flex items-center justify-center">
             <AlgorithmSelector
               selected={selectedAlgorithm}
-              onSelect={setSelectedAlgorithm}
+              onSelect={handleSelectAlgorithm}
             />
           </div>
 
@@ -179,6 +205,27 @@ function App() {
             Compare All Algorithms
           </button>
         </div>
+
+        {/* No Algorithm Selected Warning */}
+        {noAlgorithmError && (
+          <div className="flex justify-center animate-[fadeSlideIn_0.3s_ease-out]">
+            <div className="relative flex items-center gap-3 bg-amber-500/10 border border-red-500/40 rounded-lg px-6 py-4 text-red-300 font-semibold shadow-lg max-w-xl w-full">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 flex-shrink-0 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86l-8.6 14.92A1 1 0 002.54 20h18.92a1 1 0 00.85-1.22l-8.6-14.92a1 1 0 00-1.42 0z" />
+              </svg>
+              <span>Select a Scheduling Algorithm to get the visualization.</span>
+              <button
+                onClick={() => setNoAlgorithmError(false)}
+                className="ml-auto text-amber-400 hover:text-amber-200 transition"
+                aria-label="Dismiss"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* PROCESS TABLE / PER-PROCESS STATS LOGIC */}
         {!simulationResult || comparisonResults ? (

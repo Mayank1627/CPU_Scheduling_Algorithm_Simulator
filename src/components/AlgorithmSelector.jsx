@@ -68,26 +68,27 @@ function AlgorithmSelector({ selected, onSelect }) {
   const selectedAlgo = ALGORITHMS.find(a => a.id === selected);
 
   return (
-    <div className="space-y-8 shadow-xl">
+    <div className="w-full h-full flex flex-col">
       {/* Select Algorithm Button */}
       <div
         onClick={() => setOpen(!open)}
-        className="
-      cursor-pointer mt-4 rounded-xl bg-blue-600 px-6 py-5 text-center
-      shadow-xl hover:shadow-2xl hover:bg-blue-400 
-      ring-1 ring-slate-700 transition-all 
-    ">
-        <p className="text-lg font-semibold text-white">
+        className={`
+      cursor-pointer rounded-xl px-6 py-5 text-center
+      shadow-xl hover:shadow-2xl
+      ring-1 transition-all flex-1 flex flex-col justify-center
+      bg-slate-100 ring-slate-300 hover:bg-slate-200
+    `}>
+        <p className={`font-bold text-slate-700 ${selectedAlgo ? "text-lg" : "text-3xl"}`}>
           {selectedAlgo ? "Selected Algorithm" : "Select Scheduling Algorithm"}
         </p>
 
           {selectedAlgo && (
       <div className="mt-4 text-left">
-        <p className="text-2xl font-extrabold text-gray-900 text-center">
+        <p className="text-2xl font-extrabold text-slate-800 text-center">
           {selectedAlgo.fullName}
         </p>
 
-        <ul className="mt-4 space-y-2 text-m text-black font-semibold list-disc list-inside">
+        <ul className="mt-4 space-y-2 text-m text-slate-600 font-semibold list-disc list-inside">
           {selectedAlgo.details.map((point, index) => (
             <li key={index}>{point}</li>
           ))}
@@ -99,7 +100,7 @@ function AlgorithmSelector({ selected, onSelect }) {
 
       {/* Algorithm List */}
       {open && (
-        <div className="space-y-4">
+        <div className="space-y-4 mt-4">
           {ALGORITHMS.map(algo => {
             const isSelected = selected === algo.id;
 
@@ -145,8 +146,6 @@ function AlgorithmSelector({ selected, onSelect }) {
           })}
         </div>
       )}
-
-      <div className="h-8" />
     </div>
   );
 }
