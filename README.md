@@ -1,6 +1,6 @@
-# CPU Scheduling Algorithm Simulator
+# CPU Allocation & Process State Tracing Engine
 
-An interactive web-based simulator for visualizing and analyzing **CPU scheduling algorithms**.  
+An interactive web-based engine for visualizing and analyzing **CPU scheduling algorithms and process state tracing**.  
 This project helps understand how different scheduling strategies affect process execution, waiting time, turnaround time, and overall CPU performance.
 
 ---
