@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AlgorithmSelector from "./components/AlgorithmSelector.jsx";
 import ProcessForm from "./components/ProcessForm.jsx";
 import ProcessTable from "./components/ProcessTable.jsx";
@@ -18,17 +18,38 @@ import { roundRobinScheduler } from "./core/schedulers/roundRobin.js";
 
 import { computeMetrics } from "./core/metrics.js";
 
-function App() {
-    const [mode, setMode] = useState('static'); // 'static' | 'realtime'
+const loadState = (key, defaultValue) => {
+    try {
+        const saved = localStorage.getItem(key);
+        if (saved !== null) {
+            return JSON.parse(saved);
+        }
+    } catch (e) {
+        console.error(`Failed to parse local storage for ${key}`, e);
+    }
+    return defaultValue;
+};
 
+function App() {
+    const [mode, setMode] = useState(() => loadState('cpu_sim_mode', 'static'));
     const [selectedAlgorithm, setSelectedAlgorithm] = useState(null);
-    const [processes, setProcesses] = useState([]);
+    const [processes, setProcesses] = useState(() => loadState('cpu_sim_processes', []));
+    const [timeQuantum, setTimeQuantum] = useState(() => loadState('cpu_sim_quantum', 2));
+
+    useEffect(() => {
+        try {
+            localStorage.setItem('cpu_sim_mode', JSON.stringify(mode));
+            localStorage.setItem('cpu_sim_algo', JSON.stringify(selectedAlgorithm));
+            localStorage.setItem('cpu_sim_processes', JSON.stringify(processes));
+            localStorage.setItem('cpu_sim_quantum', JSON.stringify(timeQuantum));
+        } catch(e) {
+            console.error("Failed to save state to local storage", e);
+        }
+    }, [mode, selectedAlgorithm, processes, timeQuantum]);
 
     const [simulationResult, setSimulationResult] = useState(null);
     const [metrics, setMetrics] = useState(null);
     const [comparisonResults, setComparisonResults] = useState(null);
-
-    const [timeQuantum, setTimeQuantum] = useState(2);
     const [formError, setFormError] = useState("");
     const [noAlgorithmError, setNoAlgorithmError] = useState(false);
 
@@ -47,32 +68,48 @@ function App() {
     };
 
     const handleAddProcess = (rawProcess) => {
+        const pId = rawProcess.id || rawProcess.pid;
         const pidExists = processes.some(
-            (p) => p.id.trim().toLowerCase() === rawProcess.id.trim().toLowerCase()
+            (p) => (p.id || p.pid).trim().toLowerCase() === pId.trim().toLowerCase()
         );
         if (pidExists) {
-            setFormError(`Process ID "${rawProcess.id}" already exists.`);
+            setFormError(`Process ID "${pId}" already exists.`);
             return;
         }
 
         setFormError("");
 
+        let computedBurst = 0;
+        let burstsArray = [];
+
+        if (rawProcess.burstTime !== undefined) {
+            computedBurst = Number(rawProcess.burstTime);
+            burstsArray = [{ type: 'CPU', duration: computedBurst }];
+        } else if (rawProcess.bursts) {
+            burstsArray = rawProcess.bursts;
+            computedBurst = burstsArray.filter(b => b.type === 'CPU').reduce((acc, curr) => acc + curr.duration, 0);
+        }
+
         const newProcess = createProcess({
-            id: rawProcess.id,
+            id: pId,
             arrivalTime: rawProcess.arrivalTime,
-            burstTime: rawProcess.burstTime,
+            burstTime: computedBurst,
             priority:
-                selectedAlgorithm === "Priority"
+                selectedAlgorithm === "Priority" && rawProcess.priority !== undefined
                     ? rawProcess.priority
                     : null,
             color: rawProcess.color,
         });
 
+        // Add realtime compatibility fields
+        newProcess.pid = pId;
+        newProcess.bursts = burstsArray;
+
         setProcesses((prev) => [...prev, newProcess]);
     };
 
     const handleDeleteProcess = (pid) => {
-        setProcesses((prev) => prev.filter((p) => p.id !== pid));
+        setProcesses((prev) => prev.filter((p) => p.id !== pid && p.pid !== pid));
     };
 
     const handleClearAll = () => {
@@ -160,216 +197,181 @@ function App() {
     };
 
     return (
-        <div className="min-h-screen  py-10 px-6">
-            <h1 className="relative text-center mb-16">
+        <div className="h-screen w-screen flex flex-col bg-[#e0e5ec] overflow-hidden text-slate-700">
+            {/* ── Top Command Bar (Sticky Header) ─────────────────── */}
+            <header className="shrink-0 flex items-center justify-between px-8 py-4 neu-extruded mx-6 my-4 rounded-2xl z-10">
+                <div>
+                    <h1 className="text-xl font-extrabold tracking-tight font-['Inter'] text-slate-700">
+                        CPU Allocation & Process State Tracing Engine
+                    </h1>
+                </div>
 
 
-                <span className="text-4xl md:text-5xl font-extrabold font-[monospace] text-slate-900 tracking-tight">
-                    CPU Allocation & Process State Tracing Engine
-                </span>
+                {/* Mode Toggle with Sliding Indicator */}
+                <div className="mode-track shrink-0">
+                    <div
+                        className="mode-slider-pill"
+                        style={{
+                            transform: mode === 'static' ? 'translateX(0%)' : 'translateX(100%)'
+                        }}
+                        aria-hidden="true"
+                    />
 
-                <span className="block mt-2 text-base text-slate-600 text-lg font-[monospace]">
-                    Interactive Visualization & Performance Analysis
-                </span>
-            </h1>
-
-            {/* ── Mode Toggle ──────────────────────────────────────── */}
-            <div className="flex justify-center mb-10">
-                <div className="inline-flex rounded-xl bg-slate-800 p-1.5 shadow-lg">
                     <button
                         onClick={() => setMode('static')}
-                        className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${mode === 'static'
-                            ? 'bg-white text-slate-900 shadow-md'
-                            : 'text-slate-400 hover:text-slate-200'
-                            }`}
+                        className={`mode-btn-option ${mode === 'static' ? 'active' : 'inactive'}`}
                     >
-                        CPU Allocation and Metrics
+                        Static Metrics
                     </button>
                     <button
                         onClick={() => setMode('realtime')}
-                        className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all rt-mode-toggle ${mode === 'realtime'
-                            ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-md shadow-cyan-500/25'
-                            : 'text-slate-400 hover:text-slate-200'
-                            }`}
+                        className={`mode-btn-option ${mode === 'realtime' ? 'active' : 'inactive'}`}
                     >
-                        ⚡ Real-Time Process States
+                        Real-Time Tracing
                     </button>
                 </div>
-            </div>
+            </header>
 
-            {/* ── Realtime Mode ────────────────────────────────────── */}
+            {/* ── Main Content ────────────────────────────────────── */}
             {mode === 'realtime' ? (
-                <div className="w-full max-w-[1600px] mx-auto">
-                    <RealtimeMode onExitMode={() => setMode('static')} />
+                <div className="flex-1 overflow-hidden px-6 pb-6 flex">
+                    <RealtimeMode 
+                        onExitMode={() => setMode('static')} 
+                        processes={processes}
+                        onAddProcess={handleAddProcess}
+                        onDeleteProcess={handleDeleteProcess}
+                        onClearAll={handleClearAll}
+                    />
                 </div>
             ) : (
-                <div className="w-full max-w-[1600px] mx-auto space-y-12">
-                    {/* Top Section */}
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
-                        <div className="bg-gray-900 p-8 rounded-xl shadow-xl flex items-center justify-center">
+                <div className="flex-1 flex gap-6 px-6 pb-6 overflow-hidden">
+                    {/* ── Left Sidebar (Setup) ────────────────────── */}
+                    <aside className="clean-scroll w-[320px] shrink-0 flex flex-col gap-6 sticky top-0 h-full pr-2">
+                        {/* Algorithm Selector */}
+                        <div className="neu-extruded p-5 rounded-[16px]">
                             <AlgorithmSelector
                                 selected={selectedAlgorithm}
                                 onSelect={handleSelectAlgorithm}
                             />
                         </div>
 
-                        <ProcessForm
-                            onAddProcess={handleAddProcess}
-                            selectedAlgorithm={selectedAlgorithm}
-                            onSetTimeQuantum={setTimeQuantum}
-                            error={formError}
-                        />
-                    </div>
-
-                    {/* Buttons */}
-                    <div className="flex justify-center gap-8">
-                        <button
-                            onClick={handleSimulate}
-                            className="px-12 py-4 text-lg rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 transition"
-                        >
-                            Simulate Algorithm
-                        </button>
-
-                        <button
-                            onClick={handleCompareAll}
-                            className="px-12 py-4 text-lg rounded-lg bg-amber-500 text-white font-bold hover:bg-yellow-700 transition"
-                        >
-                            Compare All Algorithms
-                        </button>
-                    </div>
-
-                    {/* No Algorithm Selected Warning */}
-                    {noAlgorithmError && (
-                        <div className="flex justify-center animate-[fadeSlideIn_0.3s_ease-out]">
-                            <div className="relative flex items-center gap-3 bg-amber-500/10 border border-red-500/40 rounded-lg px-6 py-4 text-red-300 font-semibold shadow-lg max-w-xl w-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 flex-shrink-0 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86l-8.6 14.92A1 1 0 002.54 20h18.92a1 1 0 00.85-1.22l-8.6-14.92a1 1 0 00-1.42 0z" />
-                                </svg>
-                                <span>Select a Scheduling Algorithm to get the visualization.</span>
-                                <button
-                                    onClick={() => setNoAlgorithmError(false)}
-                                    className="ml-auto text-amber-400 hover:text-amber-200 transition"
-                                    aria-label="Dismiss"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* PROCESS TABLE / PER-PROCESS STATS LOGIC */}
-                    {!simulationResult || comparisonResults ? (
-                        <div className="flex justify-center">
-                            <div className="w-full xl:w-1/2">
-                                <ProcessTable
-                                    processes={processes}
-                                    onDeleteProcess={handleDeleteProcess}
-                                    onClearAll={handleClearAll}
+                        {/* Global Time Quantum for Round Robin */}
+                        {selectedAlgorithm === "RR" && (
+                            <div className="neu-extruded p-5 rounded-[16px]">
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">
+                                    Set Time Quantum
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={timeQuantum}
+                                    onChange={(e) => {
+                                        const value = Number(e.target.value);
+                                        if (value > 0) setTimeQuantum(value);
+                                    }}
+                                    className="w-full neu-pressed px-4 py-3 text-slate-700 font-bold focus:outline-none"
                                 />
                             </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-4">
+                            <button
+                                onClick={handleSimulate}
+                                className="flex-1 py-3 text-sm font-bold btn-simulate"
+                            >
+                                Simulate
+                            </button>
+                            <button
+                                onClick={handleCompareAll}
+                                className="flex-1 py-3 text-sm font-bold btn-compare"
+                            >
+                                Compare All
+                            </button>
                         </div>
-                    ) : (
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-10 items-start">
+
+                        {/* No Algorithm Warning */}
+                        {noAlgorithmError && (
+                            <div className="neu-pressed p-4 rounded-xl flex items-center gap-3 text-amber-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86l-8.6 14.92A1 1 0 002.54 20h18.92a1 1 0 00.85-1.22l-8.6-14.92a1 1 0 00-1.42 0z" />
+                                </svg>
+                                <span className="text-sm font-bold">Select an algorithm</span>
+                            </div>
+                        )}
+
+                        {/* Process Form */}
+                        <div className="neu-extruded p-5 rounded-[16px] mb-4">
+                            <ProcessForm
+                                onAddProcess={handleAddProcess}
+                                selectedAlgorithm={selectedAlgorithm}
+                                error={formError}
+                            />
+                        </div>
+                    </aside>
+
+                    {/* ── Center Workspace (The Main Canvas) ──────── */}
+                    <main className="clean-scroll flex-1 flex flex-col gap-6 h-full pr-4 pb-12">
+                        {/* Process List Section */}
+                        <div className="neu-extruded p-6 rounded-[16px] w-full shrink-0">
                             <ProcessTable
                                 processes={processes}
+                                selectedAlgorithm={selectedAlgorithm}
+                                timeQuantum={timeQuantum}
                                 onDeleteProcess={handleDeleteProcess}
                                 onClearAll={handleClearAll}
                             />
-                            <ProcessStatsTable processes={simulationResult.processes} />
                         </div>
-                    )}
 
-                    {/* GANTT CHART */}
-                    {simulationResult && (
-                        <div className="w-full">
-                            <GanttChart timeline={simulationResult.timeline} />
-                        </div>
-                    )}
+                        {/* Per Process Stats Section */}
+                        {simulationResult && !comparisonResults && (
+                            <div className="neu-extruded p-6 rounded-[16px] w-full shrink-0">
+                                <ProcessStatsTable processes={simulationResult.processes} />
+                            </div>
+                        )}
 
+                        {/* Comparison Table Section */}
+                        {comparisonResults && (
+                            <div className="neu-extruded p-6 rounded-[16px] w-full shrink-0">
+                                <ComparisonTable results={comparisonResults} />
+                            </div>
+                        )}
 
-                    {/* METRICS */}
-                    {metrics && (
-                        <div className="w-full bg-slate-800 rounded-xl p-10 shadow-xl space-y-8">
-                            <h2 className="text-2xl font-extrabold text-center text-slate-100">
-                                Simulation Metrics ({selectedAlgorithm})
-                            </h2>
+                        {/* Gantt Chart Section */}
+                        {simulationResult && (
+                            <div className="neu-extruded p-6 rounded-[16px] w-full shrink-0 flex flex-col min-h-[300px]">
+                                <GanttChart timeline={simulationResult.timeline} />
+                            </div>
+                        )}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
-                                <div className="bg-slate-900 rounded-lg p-8 text-center">
-                                    <p className="text-sm uppercase tracking-wide text-slate-400">
-                                        Avg Waiting Time
-                                    </p>
-                                    <p className="mt-3 text-4xl font-extrabold text-slate-100">
-                                        {metrics.averageWaitingTime.toFixed(2)}
-                                    </p>
-                                </div>
-
-                                <div className="bg-slate-900 rounded-lg p-8 text-center">
-                                    <p className="text-sm uppercase tracking-wide text-slate-400">
-                                        Avg Turnaround Time
-                                    </p>
-                                    <p className="mt-3 text-4xl font-extrabold text-slate-100">
-                                        {metrics.averageTurnaroundTime.toFixed(2)}
-                                    </p>
-                                </div>
-
-                                <div className="bg-slate-900 rounded-lg p-8 text-center">
-                                    <p className="text-sm uppercase tracking-wide text-slate-400">
-                                        CPU Utilization
-                                    </p>
-                                    <p className="mt-3 text-4xl font-extrabold text-slate-100">
-                                        {metrics.cpuUtilization.toFixed(2)}%
-                                    </p>
-                                </div>
-
-                                <div className="bg-slate-900 rounded-lg p-8 text-center">
-                                    <p className="text-sm uppercase tracking-wide text-slate-400">
-                                        Throughput
-                                    </p>
-                                    <p className="mt-3 text-4xl font-extrabold text-slate-100">
-                                        {metrics.throughput.toFixed(4)}
-                                    </p>
+                        {/* Metrics Section */}
+                        {metrics && (
+                            <div className="neu-extruded p-6 rounded-[16px] w-full shrink-0">
+                                <h2 className="text-lg font-bold text-slate-700 mb-6 text-center uppercase tracking-wide">
+                                    Metrics ({selectedAlgorithm})
+                                </h2>
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                                    {[
+                                        { label: 'Avg Waiting', value: metrics.averageWaitingTime.toFixed(2) },
+                                        { label: 'Avg Turnaround', value: metrics.averageTurnaroundTime.toFixed(2) },
+                                        { label: 'CPU Util', value: `${metrics.cpuUtilization.toFixed(2)}%` },
+                                        { label: 'Throughput', value: metrics.throughput.toFixed(4) },
+                                    ].map((m) => (
+                                        <div key={m.label} className="neu-pressed p-4 rounded-[12px] text-center">
+                                            <p className="text-xs uppercase font-bold text-slate-500 mb-2">
+                                                {m.label}
+                                            </p>
+                                            <p className="text-2xl font-extrabold text-slate-700 font-['JetBrains_Mono']">
+                                                {m.value}
+                                            </p>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        </div>
-                    )}
-
-                    {/* COMPARISON */}
-                    {comparisonResults && (
-                        <div className="w-full">
-                            <ComparisonTable results={comparisonResults} />
-                        </div>
-                    )}
+                        )}
+                    </main>
                 </div>
             )}
-
-            <footer className="mt-24 py-6 text-center text-lg text-slate-600 font-[JetBrains_Mono]">
-                <span>Built by</span>
-                <span className="mx-2">•</span>
-                <a
-                    href="https://github.com/Mayank1627/CPU_Scheduling_Algorithm_Simulator.git"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 hover:text-slate-800"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="w-5 h-5"
-                    >
-                        <path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.1 3.29 9.43 7.86 10.96.57.1.78-.25.78-.56 0-.28-.01-1.02-.02-2-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.3-1.7-1.3-1.7-1.06-.73.08-.72.08-.72 1.17.08 1.79 1.21 1.79 1.21 1.04 1.78 2.73 1.27 3.4.97.1-.75.4-1.27.73-1.56-2.56-.29-5.26-1.28-5.26-5.69 0-1.26.45-2.29 1.19-3.1-.12-.3-.52-1.52.11-3.17 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.64 1.65.24 2.87.12 3.17.74.81 1.18 1.84 1.18 3.1 0 4.42-2.7 5.39-5.28 5.67.41.36.78 1.08.78 2.18 0 1.57-.02 2.83-.02 3.22 0 .31.21.67.79.56 4.56-1.53 7.84-5.86 7.84-10.96C23.5 5.74 18.27.5 12 .5z" />
-                    </svg>
-                    GitHub
-                </a>
-
-                <span className="mx-2">•</span>
-
-            </footer>
-
-
         </div>
     );
 }

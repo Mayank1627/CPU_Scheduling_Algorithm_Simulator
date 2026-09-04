@@ -50,10 +50,10 @@ const ALGORITHMS = [
     },
     {
         id: "Priority",
-        name: "Priority Scheduling",
-        fullName: "Priority Scheduling",
-        description: "CPU is allocated based on process priority values.",
-        type: "Preemptive / Non-Preemptive",
+        name: "Priority",
+        fullName: "Preemptive Priority Scheduling",
+        description: "Executes the process with the highest priority first. If a new process arrives with a higher priority, it preempts the running process.",
+        type: "Preemptive",
         details: [
             "Higher priority processes execute first",
             "Can be preemptive or non-preemptive",
@@ -68,42 +68,30 @@ function AlgorithmSelector({ selected, onSelect }) {
     const selectedAlgo = ALGORITHMS.find(a => a.id === selected);
 
     return (
-        <div className="w-full h-full flex flex-col">
+        <div className="w-full flex flex-col gap-4">
             {/* Select Algorithm Button */}
             <div
                 onClick={() => setOpen(!open)}
-                className={`
-      cursor-pointer rounded-xl px-6 py-5 text-center
-      shadow-xl hover:shadow-2xl
-      ring-1 transition-all flex-1 flex flex-col justify-center
-      bg-slate-100 ring-slate-300 hover:bg-slate-200
-    `}>
-                <p className={`font-bold text-slate-700 ${selectedAlgo ? "text-lg" : "text-3xl"}`}>
-                    {selectedAlgo ? "Selected Algorithm" : "Select Scheduling Algorithm"}
+                className="algo-selector-btn cursor-pointer px-5 py-4 flex flex-col justify-center items-center text-center transition-all"
+            >
+                <p className={`font-bold ${selectedAlgo ? "text-xs tracking-wide uppercase" : "text-base font-extrabold"}`}>
+                    {selectedAlgo ? "Selected Algorithm:" : "Select Scheduling Algorithm"}
                 </p>
 
                 {selectedAlgo && (
-                    <div className="mt-4 text-left">
-                        <p className="text-2xl font-extrabold text-slate-800 text-center">
+                    <div className="mt-1 text-center w-full">
+                        <p className="text-base font-extrabold">
                             {selectedAlgo.fullName}
                         </p>
-
-                        <ul className="mt-4 space-y-2 text-m text-slate-600 font-semibold list-disc list-inside">
-                            {selectedAlgo.details.map((point, index) => (
-                                <li key={index}>{point}</li>
-                            ))}
-                        </ul>
                     </div>
                 )}
-
             </div>
 
             {/* Algorithm List */}
             {open && (
-                <div className="space-y-4 mt-4">
+                <div className="flex flex-col gap-3">
                     {ALGORITHMS.map(algo => {
                         const isSelected = selected === algo.id;
-
                         return (
                             <div
                                 key={algo.id}
@@ -111,32 +99,17 @@ function AlgorithmSelector({ selected, onSelect }) {
                                     onSelect(algo.id);
                                     setOpen(false);
                                 }}
-                                className={`
-                  relative cursor-pointer rounded-xl px-6 py-5 transition-all
-                  ${isSelected
-                                        ? "bg-slate-300 text-slate-900 shadow-xl"
-                                        : "bg-slate-800 text-slate-200 hover:bg-slate-700"
-                                    }
-                `}
+                                className={`algo-card relative px-5 py-4 transition-all ${isSelected ? "selected" : ""}`}
                             >
-                                {/* Preemptive tag */}
-                                <span
-                                    className={`
-                    absolute top-4 right-4 text-xs font-semibold px-3 py-1 rounded-full
-                    ${algo.type.includes("Preemptive")
-                                            ? "bg-purple-500/20 text-white-800"
-                                            : "bg-emerald-500/20 text-emerald-300"
-                                        }
-                  `}
-                                >
-                                    {algo.type}
-                                </span>
-
-                                <h3 className="text-xl font-bold tracking-tight">
-                                    {algo.name}
-                                </h3>
-
-                                <p className="mt-2 text-sm leading-relaxed max-w-3xl">
+                                <div className="flex justify-between items-center mb-1">
+                                    <h3 className="text-sm font-bold tracking-tight text-white">
+                                        {algo.name}
+                                    </h3>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-white opacity-80">
+                                        {algo.type.includes("Non-Preemptive") ? "Non-Preemptive" : "Preemptive"}
+                                    </span>
+                                </div>
+                                <p className="text-xs leading-relaxed text-white opacity-90">
                                     {algo.description}
                                 </p>
                             </div>

@@ -14,80 +14,81 @@ export function srtfScheduler(processes) {
   let completed = 0;
   const n = procList.length;
 
-  let lastPid = null;
+  let currentProc = null;
   let blockStart = 0;
+  let readyQueue = [];
 
+  // Sort by arrival time initially to process arrivals
+  procList.sort((a, b) => a.arrivalTime - b.arrivalTime);
+  
   while (completed < n) {
-    const available = procList.filter(
-      (p) => p.arrivalTime <= currentTime && p.remainingTime > 0
-    );
-
-    if (available.length === 0) {
-      if (lastPid !== "IDLE") {
-        if (lastPid !== null) {
-          timeline.push(
-            createTimelineBlock({
-              pid: lastPid,
-              start: blockStart,
-              end: currentTime,
-              color:
-                lastPid === "IDLE"
-                  ? "#ffffff"
-                  : procList.find((p) => p.id === lastPid).color,
-            })
-          );
-        }
-        lastPid = "IDLE";
-        blockStart = currentTime;
-      }
-      currentTime++;
-      continue;
+    // 1. Handle new arrivals at currentTime
+    const arrivals = procList.filter((p) => p.arrivalTime === currentTime);
+    for (const p of arrivals) {
+      readyQueue.push(p);
     }
 
-    available.sort((a, b) => a.remainingTime - b.remainingTime);
-    const currentProc = available[0];
-
-    if (currentProc.startTime === null) {
-      currentProc.startTime = currentTime;
+    // 2. Put the currently running process back into the ready queue if it's not finished
+    if (currentProc !== null && currentProc.remainingTime > 0) {
+      readyQueue.push(currentProc);
     }
 
-    if (lastPid !== currentProc.id) {
-      if (lastPid !== null) {
+    // 3. Sort the ready queue by remaining time (stable sort preserves FIFO for ties)
+    readyQueue.sort((a, b) => a.remainingTime - b.remainingTime);
+
+    // 4. Select the next process to run
+    let nextProc = readyQueue.length > 0 ? readyQueue.shift() : null;
+
+    // Logging for debugging as requested
+    const readyStr = `[${readyQueue.map(p => p.id).join(", ")}]`;
+    let event = "CONTINUE";
+    if (currentProc === null && nextProc !== null) event = "DISPATCH";
+    else if (currentProc !== null && nextProc !== null && currentProc.id !== nextProc.id) event = "PREEMPT";
+    
+    console.log(`[ t=${currentTime} ] Running: ${nextProc ? nextProc.id : 'IDLE'} (rem: ${nextProc ? nextProc.remainingTime : '-'}) | Ready: ${readyStr} | Event: ${event}`);
+
+    // Update timeline blocks
+    if (currentProc !== nextProc) {
+      if (currentProc !== null) {
         timeline.push(
           createTimelineBlock({
-            pid: lastPid,
+            pid: currentProc.id,
             start: blockStart,
             end: currentTime,
-            color:
-              lastPid === "IDLE"
-                ? "#ffffff"
-                : procList.find((p) => p.id === lastPid).color,
+            color: currentProc.id === "IDLE" ? "#ffffff" : currentProc.color,
           })
         );
       }
-      lastPid = currentProc.id;
       blockStart = currentTime;
+      currentProc = nextProc;
     }
 
-    currentProc.remainingTime--;
+    // 5. Execute the selected process
+    if (currentProc !== null) {
+      if (currentProc.startTime === null) {
+        currentProc.startTime = currentTime;
+      }
+      currentProc.remainingTime--;
+      if (currentProc.remainingTime === 0) {
+        currentProc.completionTime = currentTime + 1;
+        completed++;
+      }
+    } else {
+      // CPU is idle
+      currentProc = { id: "IDLE", remainingTime: 0, color: "#ffffff" };
+    }
+
     currentTime++;
-
-    if (currentProc.remainingTime === 0) {
-      currentProc.completionTime = currentTime;
-      completed++;
-    }
   }
 
-  if (lastPid !== null) {
+  // Push the last block
+  if (currentProc !== null && currentProc.id !== "IDLE") {
     timeline.push(
       createTimelineBlock({
-        pid: lastPid,
+        pid: currentProc.id,
         start: blockStart,
         end: currentTime,
-        color:
-          lastPid === "IDLE"
-            ? "#ffffff"
-            : procList.find((p) => p.id === lastPid).color,
+        color: currentProc.color,
       })
     );
   }

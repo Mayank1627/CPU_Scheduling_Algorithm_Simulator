@@ -1,75 +1,81 @@
-function ProcessTable({ processes, onDeleteProcess, onClearAll }) {
+function ProcessTable({ processes, selectedAlgorithm, timeQuantum, onDeleteProcess, onClearAll }) {
     if (processes.length === 0) {
         return (
-            <div className="rounded-xl border border-dashed border-slate-300 font-semibold bg-slate-50 p-8 text-center text-gray-800">
+            <div className="text-center py-8 text-slate-500 font-bold uppercase tracking-widest text-sm">
                 No processes added yet.
             </div>
         );
     }
 
+    const isPriorityAlgo = selectedAlgorithm === "Priority";
+    const isRR = selectedAlgorithm === "RR";
+
     return (
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="flex flex-col h-full">
             {/* Header */}
-            <div className="px-6 py-4 bg-slate-700 flex justify-between items-center">
-                <h2 className="text-lg font-bold text-white ml-[45%]">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-bold text-slate-700 uppercase tracking-wide">
                     Process List
                 </h2>
 
                 <button
                     onClick={onClearAll}
-                    className="text-sm px-4 py-2 rounded-xl font-semibold bg-red-500 text-white hover:bg-red-600 transition"
+                    className="text-xs px-4 py-2 font-bold neu-btn text-red-500 hover:text-red-600 transition"
                 >
                     Clear All
                 </button>
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto">
-                <table className="w-full text-m">
-                    <thead className="bg-slate-800 text-slate-100">
+            <div className="overflow-x-auto w-full">
+                <table className="w-full table-fixed text-sm text-left">
+                    <thead className="text-xs text-slate-500 uppercase font-bold tracking-wider border-b-2 border-[#d1d9e6]">
                         <tr>
-                            <th className="px-6 py-3 text-left font-semibold">PID</th>
-                            <th className="px-6 py-3 text-left font-semibold">Arrival</th>
-                            <th className="px-6 py-3 text-left font-semibold">Burst</th>
-                            <th className="px-6 py-3 text-left font-semibold">Priority</th>
-                            <th className="px-6 py-3 text-left font-semibold">Color</th>
-                            <th className="px-6 py-3 text-right font-semibold"></th>
+                            <th className="px-4 py-3">PID</th>
+                            <th className="px-4 py-3">Arrival</th>
+                            <th className="px-4 py-3">Burst</th>
+                            {isPriorityAlgo && <th className="px-4 py-3">Priority</th>}
+                            {isRR && <th className="px-4 py-3">Time Quantum</th>}
+                            <th className="px-4 py-3">Color</th>
+                            <th className="px-4 py-3 text-right">Action</th>
                         </tr>
                     </thead>
 
-                    <tbody>
+                    <tbody className="text-slate-700 font-medium">
                         {processes.map((p) => (
                             <tr
                                 key={p.id}
-                                className="border-t border-slate-200 hover:bg-slate-50 transition"
+                                className="border-b border-[#d1d9e6]/50 hover:bg-[#d1d9e6]/20 transition"
                             >
-                                <td className="px-6 py-4 font-bold text-slate-800">
+                                <td className="px-4 py-4 font-extrabold font-['JetBrains_Mono']">
                                     {p.id}
                                 </td>
-
-                                <td className="px-6 py-4 text-slate-700 font-semibold">
+                                <td className="px-4 py-4 font-['JetBrains_Mono']">
                                     {p.arrivalTime}
                                 </td>
-
-                                <td className="px-6 py-4 text-slate-700 font-semibold">
+                                <td className="px-4 py-4 font-['JetBrains_Mono']">
                                     {p.burstTime}
                                 </td>
-
-                                <td className="px-6 py-4 text-slate-700 font-semibold">
-                                    {p.priority ?? "N/A"}
-                                </td>
-
-                                <td className="px-6 py-4">
+                                {isPriorityAlgo && (
+                                    <td className="px-4 py-4 font-['JetBrains_Mono']">
+                                        {p.priority ?? "—"}
+                                    </td>
+                                )}
+                                {isRR && (
+                                    <td className="px-4 py-4 font-['JetBrains_Mono']">
+                                        {timeQuantum}
+                                    </td>
+                                )}
+                                <td className="px-4 py-4">
                                     <span
-                                        className="inline-block h-4 w-4 rounded"
+                                        className="inline-block h-5 w-5 rounded-md neu-extruded"
                                         style={{ backgroundColor: p.color }}
                                     />
                                 </td>
-
-                                <td className="px-6 py-4 text-right">
+                                <td className="px-4 py-4 text-right">
                                     <button
                                         onClick={() => onDeleteProcess(p.id)}
-                                        className="px-3 py-1 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 transition"
+                                        className="px-3 py-1.5 text-xs font-bold rounded-lg neu-btn text-red-500"
                                     >
                                         Remove
                                     </button>

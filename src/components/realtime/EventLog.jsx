@@ -15,37 +15,37 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 
 /* ── SVG Icons ────────────────────────────────────────────────── */
 const IconTerminal = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="4 17 10 11 4 5" /><line x1="12" y1="19" x2="20" y2="19" />
     </svg>
 );
 const IconCopy = () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
     </svg>
 );
 const IconExpand = () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" />
     </svg>
 );
 const IconCollapse = () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="4 14 10 14 10 20" /><polyline points="20 10 14 10 14 4" /><line x1="14" y1="10" x2="21" y2="3" /><line x1="3" y1="21" x2="10" y2="14" />
     </svg>
 );
 const IconScrollDown = () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 5v14M5 12l7 7 7-7" />
     </svg>
 );
 const IconCheck = () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="20 6 9 17 4 12" />
     </svg>
 );
 const IconClock = () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
     </svg>
 );
@@ -61,43 +61,43 @@ function parseEvent(rawText, index) {
 
     let category = 'system';
     let badgeLabel = 'SYS';
-    let badgeClass = 'rt-badge-system';
+    let badgeColor = 'text-slate-500 bg-slate-400/20';
 
     if (rest.includes('terminated')) {
         category = 'term';
         badgeLabel = 'TERM';
-        badgeClass = 'rt-badge-term';
+        badgeColor = 'text-purple-600 bg-purple-500/20';
     } else if (rest.includes('WARNING')) {
         category = 'warning';
-        badgeLabel = 'WARNING';
-        badgeClass = 'rt-badge-warning';
+        badgeLabel = 'WARN';
+        badgeColor = 'text-amber-600 bg-amber-500/20';
     } else if (rest.includes('INFO')) {
         category = 'info';
         badgeLabel = 'INFO';
-        badgeClass = 'rt-badge-info';
+        badgeColor = 'text-blue-600 bg-blue-500/20';
     } else if (rest.includes('→ CPU') || (rest.includes('CPU') && !rest.includes('I/O'))) {
         category = 'cpu';
-        badgeLabel = 'DISPATCH';
-        badgeClass = 'rt-badge-cpu';
+        badgeLabel = 'CPU';
+        badgeColor = 'text-emerald-600 bg-emerald-500/20';
     } else if (rest.includes('I/O Device') || rest.includes('→ I/O')) {
         category = 'io';
-        badgeLabel = 'I/O BLOCK';
-        badgeClass = 'rt-badge-io';
+        badgeLabel = 'I/O';
+        badgeColor = 'text-amber-600 bg-amber-500/20';
     } else if (rest.includes('I/O complete')) {
         category = 'io';
         badgeLabel = 'I/O DONE';
-        badgeClass = 'rt-badge-io-complete';
+        badgeColor = 'text-emerald-600 bg-emerald-500/20';
     } else if (rest.includes('arrived')) {
         category = 'arrival';
-        badgeLabel = 'ARRIVAL';
-        badgeClass = 'rt-badge-arrival';
+        badgeLabel = 'ARR';
+        badgeColor = 'text-cyan-600 bg-cyan-500/20';
     } else if (rest.includes('Ready Queue')) {
         category = 'ready';
         badgeLabel = 'READY';
-        badgeClass = 'rt-badge-ready';
+        badgeColor = 'text-indigo-600 bg-indigo-500/20';
     }
 
-    return { id: index, raw: rawText, time, pid, category, badgeLabel, badgeClass, message: rest };
+    return { id: index, raw: rawText, time, pid, category, badgeLabel, badgeColor, message: rest };
 }
 
 function EventLog({ events = [] }) {
@@ -157,109 +157,114 @@ function EventLog({ events = [] }) {
     const hasActiveFilters = categoryFilter !== 'all' || selectedPid !== 'all' || searchQuery !== '';
 
     return (
-        <div className={`rt-terminal ${isExpanded ? 'rt-terminal-expanded' : ''}`}>
+        <div className={`flex flex-col h-full bg-transparent transition-all duration-300 ${isExpanded ? 'fixed inset-4 z-50 neu-extruded rounded-2xl p-6 bg-[#e0e5ec]' : ''}`}>
             {/* ── Title Bar ─────────────────────────────────────────── */}
-            <div className="rt-terminal-titlebar">
-                <div className="rt-terminal-titlebar-left">
-                    <span className="rt-terminal-dot rt-dot-red" />
-                    <span className="rt-terminal-dot rt-dot-yellow" />
-                    <span className="rt-terminal-dot rt-dot-green" />
-                    <span className="rt-terminal-title">
-                        <IconTerminal /> System Event Log
-                    </span>
-                    <span className="rt-terminal-count">{events.length}</span>
+            <div className="flex justify-between items-center mb-3">
+                <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-white">
+                    {/* Window Controls / Status Indicator Dots: Green, Yellow, Red */}
+                    <div className="flex items-center gap-1.5 mr-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] shadow-[0_0_6px_rgba(16,185,129,0.6)]" title="Active" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b] shadow-[0_0_6px_rgba(245,158,11,0.6)]" title="Pending" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444] shadow-[0_0_6px_rgba(239,68,68,0.6)]" title="Alert" />
+                    </div>
+                    <span className="text-white"><IconTerminal /></span>
+                    <span className="text-white font-extrabold" style={{ color: '#ffffff' }}>System Event Log</span>
+                    <span className="neu-pressed px-2 py-0.5 rounded-md text-[10px] text-white" style={{ color: '#ffffff' }}>{events.length}</span>
                 </div>
-                <div className="rt-terminal-titlebar-actions">
+                <div className="flex items-center gap-2">
                     <button
                         onClick={() => setAutoScroll(!autoScroll)}
-                        className={`rt-terminal-action ${autoScroll ? 'rt-terminal-action-active' : ''}`}
+                        className={`p-1.5 rounded-md transition flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider ${autoScroll ? 'neu-pressed text-emerald-600' : 'neu-btn text-slate-400'}`}
                         title={autoScroll ? 'Auto-scroll ON' : 'Auto-scroll OFF'}
                     >
-                        <IconScrollDown /> {autoScroll ? 'Scroll ON' : 'Scroll OFF'}
+                        <IconScrollDown /> {autoScroll ? 'ON' : 'OFF'}
                     </button>
-                    <button onClick={handleCopyLogs} disabled={events.length === 0} className="rt-terminal-action" title="Copy logs">
+                    <button onClick={handleCopyLogs} disabled={events.length === 0} className="p-1.5 rounded-md neu-btn text-slate-400 hover:text-slate-600 transition flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider disabled:opacity-50" title="Copy logs">
                         {copied ? <><IconCheck /> Copied</> : <><IconCopy /> Copy</>}
                     </button>
-                    <button onClick={() => setIsExpanded(!isExpanded)} className="rt-terminal-action" title={isExpanded ? 'Compact' : 'Expand'}>
-                        {isExpanded ? <><IconCollapse /> Compact</> : <><IconExpand /> Expand</>}
+                    <button onClick={() => setIsExpanded(!isExpanded)} className="p-1.5 rounded-md neu-btn text-slate-400 hover:text-slate-600 transition flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider" title={isExpanded ? 'Compact' : 'Expand'}>
+                        {isExpanded ? <IconCollapse /> : <IconExpand />}
                     </button>
                 </div>
             </div>
 
             {/* ── Filter Toolbar ────────────────────────────────────── */}
-            <div className="rt-terminal-toolbar">
-                <div className="rt-terminal-filters">
-                    {[
-                        { key: 'all', label: 'All', count: counts.all },
-                        { key: 'cpu', label: 'CPU', count: counts.cpu },
-                        { key: 'io', label: 'I/O', count: counts.io },
-                        { key: 'arrival', label: 'Arrival', count: counts.arrival },
-                        { key: 'term', label: 'Terminated', count: counts.term },
-                    ].map((f) => (
-                        <button
-                            key={f.key}
-                            onClick={() => setCategoryFilter(f.key)}
-                            className={`rt-terminal-chip ${categoryFilter === f.key ? `rt-terminal-chip-active rt-terminal-chip-${f.key}` : ''}`}
-                        >
-                            {f.label} <span className="rt-terminal-chip-count">{f.count}</span>
-                        </button>
-                    ))}
-                </div>
-                <div className="rt-terminal-search-area">
-                    {uniquePids.length > 0 && (
-                        <select value={selectedPid} onChange={(e) => setSelectedPid(e.target.value)} className="rt-terminal-select">
-                            <option value="all">All PIDs</option>
-                            {uniquePids.map((pid) => <option key={pid} value={pid}>{pid}</option>)}
-                        </select>
-                    )}
-                    <div className="rt-terminal-search-wrap">
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Filter logs..."
-                            className="rt-terminal-search"
-                        />
-                        {searchQuery && (
-                            <button onClick={() => setSearchQuery('')} className="rt-terminal-search-x" title="Clear">x</button>
+            {isExpanded && (
+                <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
+                    <div className="flex gap-2">
+                        {[
+                            { key: 'all', label: 'All', count: counts.all },
+                            { key: 'cpu', label: 'CPU', count: counts.cpu },
+                            { key: 'io', label: 'I/O', count: counts.io },
+                            { key: 'arrival', label: 'Arrival', count: counts.arrival },
+                            { key: 'term', label: 'Term', count: counts.term },
+                        ].map((f) => (
+                            <button
+                                key={f.key}
+                                onClick={() => setCategoryFilter(f.key)}
+                                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition ${categoryFilter === f.key ? 'neu-pressed text-cyan-600' : 'neu-btn text-slate-500'}`}
+                            >
+                                {f.label} <span className="bg-slate-400/20 px-1 rounded text-[9px]">{f.count}</span>
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {uniquePids.length > 0 && (
+                            <select value={selectedPid} onChange={(e) => setSelectedPid(e.target.value)} className="neu-pressed px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 outline-none bg-transparent appearance-none cursor-pointer">
+                                <option value="all">All PIDs</option>
+                                {uniquePids.map((pid) => <option key={pid} value={pid}>{pid}</option>)}
+                            </select>
+                        )}
+                        <div className="relative flex items-center">
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Filter logs..."
+                                className="neu-pressed px-3 py-1.5 pr-8 rounded-lg text-xs font-bold text-slate-600 outline-none w-48"
+                            />
+                            {searchQuery && (
+                                <button onClick={() => setSearchQuery('')} className="absolute right-2 text-slate-400 hover:text-slate-600 font-bold" title="Clear">×</button>
+                            )}
+                        </div>
+                        {hasActiveFilters && (
+                            <button onClick={() => { setCategoryFilter('all'); setSelectedPid('all'); setSearchQuery(''); }} className="neu-btn px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-red-500">
+                                Reset
+                            </button>
                         )}
                     </div>
-                    {hasActiveFilters && (
-                        <button onClick={() => { setCategoryFilter('all'); setSelectedPid('all'); setSearchQuery(''); }} className="rt-terminal-reset">
-                            Reset
-                        </button>
-                    )}
                 </div>
-            </div>
+            )}
 
             {/* ── Log Output ────────────────────────────────────────── */}
-            <div ref={scrollContainerRef} className={`rt-terminal-output ${isExpanded ? 'rt-terminal-output-expanded' : ''}`}>
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pr-2 flex flex-col gap-1.5 font-['JetBrains_Mono'] text-[11px] font-bold text-slate-500">
                 {events.length === 0 ? (
-                    <div className="rt-terminal-empty">
-                        <p className="rt-terminal-empty-main">Waiting for events...</p>
-                        <p className="rt-terminal-empty-sub">Press Play or Step to begin.</p>
+                    <div className="flex flex-col items-center justify-center h-full text-slate-400 uppercase tracking-widest text-xs">
+                        <p>Waiting for events...</p>
                     </div>
                 ) : filteredEvents.length === 0 ? (
-                    <div className="rt-terminal-empty">
-                        <p className="rt-terminal-empty-main">No events match filter</p>
+                    <div className="flex flex-col items-center justify-center h-full text-slate-400 uppercase tracking-widest text-xs gap-2">
+                        <p>No events match filter</p>
                         <button
                             onClick={() => { setCategoryFilter('all'); setSelectedPid('all'); setSearchQuery(''); }}
-                            className="rt-terminal-empty-link"
+                            className="neu-btn px-3 py-1.5 rounded-lg text-cyan-600"
                         >
-                            Clear filters ({events.length} total)
+                            Clear filters
                         </button>
                     </div>
                 ) : (
-                    <div className="rt-terminal-lines">
-                        {filteredEvents.map((ev) => (
-                            <div key={ev.id} className={`rt-terminal-line ${ev.category === 'warning' ? 'rt-terminal-line-warning' : ''} ${ev.category === 'info' ? 'rt-terminal-line-info' : ''}`}>
-                                <span className="rt-terminal-ts"><IconClock /> {String(ev.time).padStart(2, '0')}s</span>
-                                <span className={`rt-terminal-badge ${ev.badgeClass}`}>{ev.badgeLabel}</span>
-                                {ev.pid && <span className="rt-terminal-pid">{ev.pid}</span>}
-                                <span className="rt-terminal-msg">{ev.message}</span>
-                            </div>
-                        ))}
-                    </div>
+                    filteredEvents.map((ev) => (
+                        <div key={ev.id} className="flex items-start gap-3 py-1 border-b border-slate-300/30 last:border-0 hover:bg-slate-300/20 transition-colors rounded px-2">
+                            <span className="flex items-center gap-1 text-slate-400 shrink-0 w-16"><IconClock /> {String(ev.time).padStart(2, '0')}s</span>
+                            <span className={`shrink-0 w-16 text-center px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-extrabold ${ev.badgeColor}`}>{ev.badgeLabel}</span>
+                            {ev.pid ? (
+                                <span className="text-slate-600 font-extrabold w-8 shrink-0">{ev.pid}</span>
+                            ) : (
+                                <span className="w-8 shrink-0"></span>
+                            )}
+                            <span className={`flex-1 break-words ${ev.category === 'warning' ? 'text-amber-600' : 'text-slate-600'}`}>{ev.message}</span>
+                        </div>
+                    ))
                 )}
             </div>
         </div>

@@ -4,55 +4,55 @@ function ProcessStatsTable({ processes }) {
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="px-6 py-5 bg-slate-700 ">
-                <h2 className="text-lg font-bold  text-white text-center">
+        <div className="flex flex-col h-full">
+            <div className="mb-6">
+                <h2 className="text-lg font-bold text-slate-700 uppercase tracking-wide">
                     Per-Process Statistics
                 </h2>
             </div>
 
-            <div className="overflow-x-auto pb-2">
-                <table className="w-full text-m ">
-                    <thead className="bg-slate-800 text-slate-100">
+            <div className="overflow-x-auto w-full">
+                <table className="w-full table-fixed text-sm text-left">
+                    <thead className="text-xs text-slate-500 uppercase font-bold tracking-wider border-b-2 border-[#d1d9e6]">
                         <tr>
-                            <th className="px-6 py-3 text-left">PID</th>
-                            <th className="px-6 py-3 text-left">Arrival</th>
-                            <th className="px-6 py-3 text-left">Burst</th>
-                            <th className="px-6 py-3 text-left">Completion</th>
-                            <th className="px-6 py-3 text-left">Waiting</th>
-                            <th className="px-6 py-3 text-left">Turnaround</th>
+                            <th className="px-4 py-3">PID</th>
+                            <th className="px-4 py-3">Arrival</th>
+                            <th className="px-4 py-3">Burst</th>
+                            <th className="px-4 py-3">Completion</th>
+                            <th className="px-4 py-3">Waiting</th>
+                            <th className="px-4 py-3">Turnaround</th>
                         </tr>
                     </thead>
 
-                    <tbody>
+                    <tbody className="text-slate-700 font-medium">
                         {processes.map((p) => (
                             <tr
                                 key={p.id}
-                                className="border-t border-slate-200 hover:bg-slate-50 transition"
+                                className="border-b border-[#d1d9e6]/50 hover:bg-[#d1d9e6]/20 transition"
                             >
-                                <td className="px-6 py-4 font-bold text-slate-800">
-                                    <div className="flex items-center gap-2">
+                                <td className="px-4 py-4 font-extrabold font-['JetBrains_Mono']">
+                                    <div className="flex items-center gap-3">
                                         <span
-                                            className="w-3 h-3 rounded"
+                                            className="w-4 h-4 rounded-md neu-extruded"
                                             style={{ backgroundColor: p.color }}
                                         />
                                         {p.id}
                                     </div>
                                 </td>
 
-                                <td className="px-6 py-4 font-semibold text-slate-700">
+                                <td className="px-4 py-4 font-['JetBrains_Mono']">
                                     {p.arrivalTime}
                                 </td>
-                                <td className="px-6 py-4 font-semibold text-slate-700">
+                                <td className="px-4 py-4 font-['JetBrains_Mono']">
                                     {p.burstTime}
                                 </td>
-                                <td className="px-6 py-4 font-semibold text-slate-700">
+                                <td className="px-4 py-4 font-['JetBrains_Mono']">
                                     {p.completionTime}
                                 </td>
-                                <td className="px-6 py-4 font-semibold text-slate-700">
+                                <td className="px-4 py-4 font-['JetBrains_Mono']">
                                     {p.waitingTime}
                                 </td>
-                                <td className="px-6 py-4 font-semibold text-slate-700">
+                                <td className="px-4 py-4 font-['JetBrains_Mono']">
                                     {p.turnaroundTime}
                                 </td>
                             </tr>

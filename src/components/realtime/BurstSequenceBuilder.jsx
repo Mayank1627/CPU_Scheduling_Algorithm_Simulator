@@ -99,79 +99,74 @@ function BurstSequenceBuilder({ onAddProcess, existingPids = [] }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-5 bg-slate-900 p-6 rounded-xl shadow-lg">
-            <h2 className="text-xl font-bold text-slate-100">Add Process (Real-Time Mode)</h2>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <h2 className="text-lg font-bold text-slate-700 uppercase tracking-wide">Add Process</h2>
 
             {error && (
-                <div className="rounded-md bg-red-500/10 border border-red-500/30 px-4 py-2 text-sm text-red-400 font-semibold">
+                <div className="rounded-xl neu-pressed px-4 py-3 text-sm text-red-500 font-bold">
                     {error}
                 </div>
             )}
 
-            {/* PID + Arrival + Color row */}
-            <div className="grid grid-cols-3 gap-4">
+            {/* PID + Arrival + Color */}
+            <div className="flex flex-col gap-4">
                 <div>
-                    <label className="block text-sm text-slate-300 mb-1">Process ID</label>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Process ID</label>
                     <input
                         type="text"
                         value={pid}
                         onChange={(e) => setPid(e.target.value)}
                         placeholder="P1"
-                        className="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        className="w-full neu-pressed px-3 py-3 text-slate-700 font-bold focus:outline-none text-sm"
                     />
                 </div>
                 <div>
-                    <label className="block text-sm text-slate-300 mb-1">Arrival Time</label>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Arrival Time</label>
                     <input
                         type="number"
                         min="0"
                         value={arrivalTime}
                         onChange={(e) => setArrivalTime(e.target.value)}
                         placeholder="0"
-                        className="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        className="w-full neu-pressed px-3 py-3 text-slate-700 font-bold focus:outline-none text-sm"
                     />
                 </div>
-                <div className="flex items-end gap-3">
-                    <div>
-                        <label className="block text-sm text-slate-300 mb-1">Color</label>
-                        <input
-                            type="color"
-                            value={color}
-                            onChange={(e) => setColor(e.target.value)}
-                            className="h-10 w-16 rounded-md border border-slate-700 bg-slate-800 cursor-pointer"
-                        />
-                    </div>
+                <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Process Color</label>
+                    <input
+                        type="color"
+                        value={color}
+                        onChange={(e) => setColor(e.target.value)}
+                        className="w-16 h-10 neu-pressed cursor-pointer bg-transparent"
+                    />
                 </div>
             </div>
 
             {/* Burst Sequence Display */}
             <div>
-                <label className="block text-sm text-slate-300 mb-2 font-semibold">Burst Sequence</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Burst Sequence</label>
 
-                <div className="flex flex-wrap items-center gap-2 min-h-[44px] bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+                <div className="flex flex-wrap items-center gap-2 min-h-[48px] neu-pressed rounded-xl p-3">
                     {bursts.length === 0 && !pendingType && (
-                        <span className="text-slate-500 text-sm italic">No bursts added yet. Use the buttons below.</span>
+                        <span className="text-slate-400 text-xs italic font-semibold">No bursts added yet.</span>
                     )}
 
                     {bursts.map((burst, index) => (
-                        <div key={index} className="flex items-center gap-0.5">
+                        <div key={index} className="flex items-center gap-1">
                             {index > 0 && (
-                                <span className="text-slate-500 mx-1 text-lg font-bold">→</span>
+                                <span className="text-slate-400 mx-0.5 text-xs font-bold">→</span>
                             )}
                             <span
                                 className={`
-                  inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm
-                  ${burst.type === 'CPU'
-                                        ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-                                        : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
-                                    }
-                `}
+                                    inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold neu-extruded shadow-sm
+                                    ${burst.type === 'CPU' ? 'text-emerald-600' : 'text-amber-600'}
+                                `}
                             >
-                                {burst.type === 'CPU' ? <IconCPU /> : <IconIO />} {burst.duration}ms
+                                {burst.type === 'CPU' ? <IconCPU /> : <IconIO />} {burst.duration}
                                 <button
                                     type="button"
                                     onClick={() => removeBurst(index)}
-                                    className="ml-0.5 text-slate-400 hover:text-red-400 transition text-xs"
+                                    className="ml-1 text-slate-400 hover:text-red-500 transition text-xs"
                                     aria-label={`Remove burst ${index}`}
                                 >
                                     ✕
@@ -182,28 +177,20 @@ function BurstSequenceBuilder({ onAddProcess, existingPids = [] }) {
 
                     {/* Pending burst input */}
                     {pendingType && (
-                        <div className="flex items-center gap-0.5">
+                        <div className="flex items-center gap-1">
                             {bursts.length > 0 && (
-                                <span className="text-slate-500 mx-1 text-lg font-bold">→</span>
+                                <span className="text-slate-400 mx-0.5 text-xs font-bold">→</span>
                             )}
-                            <div
-                                className={`
-                  flex items-center gap-2 px-3 py-1.5 rounded-lg border shadow-sm
-                  ${pendingType === 'CPU'
-                                        ? 'bg-emerald-500/10 border-emerald-500/40'
-                                        : 'bg-amber-500/10 border-amber-500/40'
-                                    }
-                `}
-                            >
-                                <span className={`text-sm font-extrabold flex items-center gap-1.5 ${pendingType === 'CPU' ? 'text-emerald-400' : 'text-amber-400'}`}>
-                                    {pendingType === 'CPU' ? <IconCPU /> : <IconIO />} {pendingType}
+                            <div className="flex items-center gap-1 px-2 py-1 rounded-md neu-extruded shadow-sm">
+                                <span className={`text-xs font-extrabold flex items-center gap-1 ${pendingType === 'CPU' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                    {pendingType === 'CPU' ? <IconCPU /> : <IconIO />}
                                 </span>
                                 <input
                                     type="number"
                                     min="1"
                                     value={pendingDuration}
                                     onChange={(e) => setPendingDuration(e.target.value)}
-                                    placeholder="dur"
+                                    placeholder="?"
                                     autoFocus
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
@@ -212,23 +199,22 @@ function BurstSequenceBuilder({ onAddProcess, existingPids = [] }) {
                                         }
                                         if (e.key === 'Escape') cancelPending();
                                     }}
-                                    className="w-16 bg-slate-900 border border-slate-700 rounded text-center text-slate-100 font-mono text-sm py-1 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    className="w-8 bg-transparent text-center text-slate-700 font-bold text-xs py-0.5 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 />
-                                <span className="text-slate-500 text-xs font-semibold mr-1">ms</span>
-                                <div className="flex items-center gap-1 border-l border-slate-700/50 pl-2 ml-1">
+                                <div className="flex items-center gap-1 ml-1 border-l border-slate-300 pl-1">
                                     <button
                                         type="button"
                                         onClick={confirmBurst}
-                                        className="p-1 rounded text-emerald-400 hover:bg-emerald-400/20 transition"
+                                        className="text-emerald-500 hover:text-emerald-600 transition"
                                     >
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                                     </button>
                                     <button
                                         type="button"
                                         onClick={cancelPending}
-                                        className="p-1 rounded text-rose-400 hover:bg-rose-400/20 transition"
+                                        className="text-red-500 hover:text-red-600 transition"
                                     >
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                                     </button>
                                 </div>
                             </div>
@@ -243,24 +229,24 @@ function BurstSequenceBuilder({ onAddProcess, existingPids = [] }) {
                     type="button"
                     onClick={() => addBurst('CPU')}
                     disabled={pendingType !== null}
-                    className="flex-1 px-4 py-2.5 rounded-lg bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 font-semibold hover:bg-emerald-600/30 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex-1 py-2 text-xs font-bold neu-btn text-emerald-600 disabled:opacity-50 disabled:shadow-none"
                 >
-                    + Add CPU Burst
+                    + CPU Burst
                 </button>
                 <button
                     type="button"
                     onClick={() => addBurst('IO')}
                     disabled={pendingType !== null}
-                    className="flex-1 px-4 py-2.5 rounded-lg bg-amber-600/20 text-amber-300 border border-amber-500/30 font-semibold hover:bg-amber-600/30 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex-1 py-2 text-xs font-bold neu-btn text-amber-600 disabled:opacity-50 disabled:shadow-none"
                 >
-                    + Add I/O Burst
+                    + I/O Burst
                 </button>
             </div>
 
             {/* Submit */}
             <button
                 type="submit"
-                className="w-full rounded-md bg-cyan-600 hover:bg-cyan-500 text-white py-2.5 font-semibold transition shadow-lg shadow-cyan-500/20"
+                className="w-full py-3 mt-2 text-sm font-bold neu-btn-primary"
             >
                 Add Process
             </button>

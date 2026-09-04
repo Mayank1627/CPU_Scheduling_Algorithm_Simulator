@@ -1,4 +1,10 @@
-import React from 'react';
+const STATE_COLOR_MAP = {
+  ARRIVING: '#06b6d4',   // cyan-500 (ARR in EventLog: text-cyan-600)
+  READY: '#6366f1',      // indigo-500 (READY in EventLog: text-indigo-600)
+  RUNNING: '#10b981',    // emerald-500 (CPU in EventLog: text-emerald-600)
+  BLOCKED: '#f59e0b',    // amber-500 (I/O in EventLog: text-amber-600)
+  TERMINATED: '#a855f7', // purple-500 (TERM in EventLog: text-purple-600)
+};
 
 function PcbInspector({ selectedPid, snapshot, onClose }) {
   if (!selectedPid || !snapshot) return null;
@@ -55,124 +61,136 @@ function PcbInspector({ selectedPid, snapshot, onClose }) {
 
   return (
     <>
-      <div className="pcb-inspector-overlay" onClick={onClose}></div>
-      <div className="pcb-inspector-panel">
-        <div className="pcb-header">
-          <div className="pcb-title-group">
-            <h3 className="pcb-title">PROCESS CONTROL BLOCK</h3>
-            <span className="pcb-subtitle">Inspector - {process.pid}</span>
+      <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40" onClick={onClose}></div>
+      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-50">
+        <div
+          className="neu-extruded rounded-2xl p-6 flex flex-col gap-6"
+          style={{
+            boxShadow: '4px 4px 16px rgba(163, 177, 198, 0.4), -4px -4px 16px rgba(255, 255, 255, 0.7), 0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+          }}
+        >
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Process Control Block</h3>
+              <span className="text-xl font-extrabold text-slate-700 tracking-tight">Inspector - {process.pid}</span>
+            </div>
+            <button className="p-2 neu-btn text-slate-400 hover:text-red-500 transition" onClick={onClose}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
           </div>
-          <button className="pcb-close-btn" onClick={onClose}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
 
-        <div className="pcb-content">
-          <div className="pcb-section">
-            <h4 className="pcb-section-title">CORE IDENTIFICATION</h4>
-            <div className="pcb-grid">
-              <div className="pcb-field">
-                <span className="pcb-label">PID</span>
-                <span className="pcb-value" style={{ color: process.color }}>{process.pid}</span>
-              </div>
-              <div className="pcb-field">
-                <span className="pcb-label">STATE</span>
-                <span className={`pcb-value pcb-state-${currentState.toLowerCase()}`}>{currentState}</span>
-              </div>
-              <div className="pcb-field">
-                <span className="pcb-label">ARRIVAL TIME</span>
-                <span className="pcb-value">t={process.arrivalTime}</span>
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-3">
+              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Core Identification</h4>
+              <div className="neu-pressed rounded-xl p-4 grid grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">PID</span>
+                  <span className="font-extrabold font-['JetBrains_Mono'] text-lg" style={{ color: process.color }}>{process.pid}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">State</span>
+                  <span
+                    className={`pcb-state-label pcb-state-${currentState} font-extrabold tracking-wide`}
+                    style={{ color: STATE_COLOR_MAP[currentState] || '#334155' }}
+                  >
+                    {currentState}
+                  </span>
+                </div>
+                <div className="flex flex-col col-span-2">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Arrival Time</span>
+                  <span className="font-bold text-slate-700 font-['JetBrains_Mono']">t={process.arrivalTime}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="pcb-section">
-            <h4 className="pcb-section-title">{isTerminated ? 'FINALIZED METRICS' : 'LIVE EXECUTION DATA'}</h4>
-            <div className="pcb-grid">
-              {isTerminated ? (
-                <>
-                  <div className="pcb-field">
-                    <span className="pcb-label">TURNAROUND TIME</span>
-                    <span className="pcb-value">{turnaroundTime} ticks</span>
-                  </div>
-                  <div className="pcb-field">
-                    <span className="pcb-label">TOTAL WAIT TIME</span>
-                    <span className="pcb-value">{process.waitingTime} ticks</span>
-                  </div>
-                  <div className="pcb-field">
-                    <span className="pcb-label">TOTAL CPU TIME</span>
-                    <span className="pcb-value">{totalCpuBurst} ticks</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="pcb-field">
-                    <span className="pcb-label">TOTAL BURST TIME</span>
-                    <span className="pcb-value">{totalCpuBurst + totalIoBurst} ticks</span>
-                  </div>
-                  <div className="pcb-field">
-                    <span className="pcb-label">REMAINING CPU</span>
-                    <span className="pcb-value">{remainingCpu} ticks</span>
-                  </div>
-                  <div className="pcb-field">
-                    <span className="pcb-label">REMAINING I/O</span>
-                    <span className="pcb-value">{remainingIo} ticks</span>
-                  </div>
-                  <div className="pcb-field">
-                    <span className="pcb-label">CURRENT WAIT</span>
-                    <span className="pcb-value">{process.waitingTime || 0} ticks</span>
-                  </div>
-                </>
-              )}
+            <div className="flex flex-col gap-3">
+              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{isTerminated ? 'Finalized Metrics' : 'Live Execution Data'}</h4>
+              <div className="neu-pressed rounded-xl p-4 grid grid-cols-2 gap-4">
+                {isTerminated ? (
+                  <>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Turnaround Time</span>
+                      <span className="font-bold text-slate-700 font-['JetBrains_Mono']">{turnaroundTime} ticks</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Wait Time</span>
+                      <span className="font-bold text-slate-700 font-['JetBrains_Mono']">{process.waitingTime} ticks</span>
+                    </div>
+                    <div className="flex flex-col col-span-2">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total CPU Time</span>
+                      <span className="font-bold text-slate-700 font-['JetBrains_Mono']">{totalCpuBurst} ticks</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Burst Time</span>
+                      <span className="font-bold text-slate-700 font-['JetBrains_Mono']">{totalCpuBurst + totalIoBurst} ticks</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Current Wait</span>
+                      <span className="font-bold text-slate-700 font-['JetBrains_Mono']">{process.waitingTime} ticks</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Remaining CPU</span>
+                      <span className="font-bold text-slate-700 font-['JetBrains_Mono']">{remainingCpu} ticks</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Remaining I/O</span>
+                      <span className="font-bold text-slate-700 font-['JetBrains_Mono']">{remainingIo} ticks</span>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="pcb-section">
-            <h4 className="pcb-section-title">BURST SEQUENCE TRACE</h4>
-            <div className="pcb-bursts">
-              {process.bursts.map((b, i) => {
-                let statusIcon = (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="8" y1="12" x2="16" y2="12" />
-                  </svg>
-                );
-                let statusClass = 'pcb-burst-pending';
-                
-                if (isTerminated || i < process.burstIndex) {
-                  statusIcon = (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
+            <div className="flex flex-col gap-3">
+              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Burst Sequence Trace</h4>
+              <div className="neu-pressed rounded-xl p-4 flex gap-2 flex-wrap">
+                {process.bursts.map((b, i) => {
+                  let statusIcon = (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="8" y1="12" x2="16" y2="12" />
                     </svg>
                   );
-                  statusClass = 'pcb-burst-done';
-                } else if (i === process.burstIndex) {
-                  statusIcon = (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="rt-spin-icon">
-                      <line x1="12" y1="2" x2="12" y2="6" />
-                      <line x1="12" y1="18" x2="12" y2="22" />
-                      <line x1="4.93" y1="4.93" x2="7.76" y2="7.76" />
-                      <line x1="16.24" y1="16.24" x2="19.07" y2="19.07" />
-                      <line x1="2" y1="12" x2="6" y2="12" />
-                      <line x1="18" y1="12" x2="22" y2="12" />
-                      <line x1="4.93" y1="19.07" x2="7.76" y2="16.24" />
-                      <line x1="16.24" y1="4.93" x2="19.07" y2="7.76" />
-                    </svg>
-                  );
-                  statusClass = 'pcb-burst-active';
-                }
+                  let statusClass = 'bg-slate-200 text-slate-400';
 
-                return (
-                  <div key={i} className={`pcb-burst-item ${statusClass}`}>
-                    <span className="pcb-burst-status flex items-center justify-center">{statusIcon}</span>
-                    <span className="pcb-burst-type">{b.type}</span>
-                    <span className="pcb-burst-duration">{b.duration}t</span>
-                  </div>
-                );
-              })}
+                  if (isTerminated || i < process.burstIndex) {
+                    statusIcon = (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    );
+                    statusClass = 'bg-emerald-500/20 text-emerald-600';
+                  } else if (i === process.burstIndex) {
+                    statusIcon = (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+                        <line x1="12" y1="2" x2="12" y2="6" />
+                        <line x1="12" y1="18" x2="12" y2="22" />
+                        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76" />
+                        <line x1="16.24" y1="16.24" x2="19.07" y2="19.07" />
+                        <line x1="2" y1="12" x2="6" y2="12" />
+                        <line x1="18" y1="12" x2="22" y2="12" />
+                        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24" />
+                        <line x1="16.24" y1="4.93" x2="19.07" y2="7.76" />
+                      </svg>
+                    );
+                    statusClass = 'bg-amber-500/20 text-amber-600 border border-amber-500/30';
+                  }
+
+                  return (
+                    <div key={i} className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-bold ${statusClass}`}>
+                      <span className="flex items-center justify-center">{statusIcon}</span>
+                      <span>{b.type}</span>
+                      <span>{b.duration}t</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

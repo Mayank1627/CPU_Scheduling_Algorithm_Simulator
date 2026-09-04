@@ -9,11 +9,24 @@ function ProcessForm({
     const isPriorityAlgo = selectedAlgorithm === "Priority";
     const isRR = selectedAlgorithm === "RR";
 
+    const PREDEFINED_COLORS = [
+        "#60a5fa", // Blue
+        "#f472b6", // Pink
+        "#34d399", // Emerald
+        "#fbbf24", // Amber
+        "#a78bfa", // Purple
+        "#fb923c", // Orange
+        "#2dd4bf", // Teal
+        "#f87171"  // Red
+    ];
+
     const [pid, setPid] = useState("");
     const [arrivalTime, setArrivalTime] = useState("");
     const [burstTime, setBurstTime] = useState("");
     const [priority, setPriority] = useState("");
-    const [color, setColor] = useState("#60a5fa"); // default blue
+    
+    const [colorIndex, setColorIndex] = useState(0);
+    const [color, setColor] = useState(PREDEFINED_COLORS[0]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -35,24 +48,29 @@ function ProcessForm({
         setArrivalTime("");
         setBurstTime("");
         setPriority("");
+        
+        // Cycle to the next default color
+        const nextIndex = (colorIndex + 1) % PREDEFINED_COLORS.length;
+        setColorIndex(nextIndex);
+        setColor(PREDEFINED_COLORS[nextIndex]);
     };
 
     return (
         <form
             onSubmit={handleSubmit}
-            className="space-y-6 bg-slate-900 p-6 rounded-xl shadow-lg"
+            className="flex flex-col gap-4"
         >
-            <h2 className="text-xl font-bold text-slate-100">Add Process</h2>
+            <h2 className="text-lg font-bold text-slate-700">Add Process</h2>
 
             {error && (
-                <div className="rounded-md bg-red-500/10 border border-red-500/30 px-4 py-2 text-sm text-red-400 font-semibold">
+                <div className="rounded-xl neu-pressed px-4 py-3 text-sm text-red-500 font-bold">
                     {error}
                 </div>
             )}
 
             {/* Process ID */}
             <div>
-                <label className="block text-sm text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
                     Process ID
                 </label>
                 <input
@@ -60,13 +78,13 @@ function ProcessForm({
                     value={pid}
                     onChange={(e) => setPid(e.target.value)}
                     placeholder="P1"
-                    className="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full neu-pressed px-4 py-3 text-slate-700 font-bold focus:outline-none"
                 />
             </div>
 
             {/* Arrival Time */}
             <div>
-                <label className="block text-sm text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
                     Arrival Time
                 </label>
                 <input
@@ -75,13 +93,13 @@ function ProcessForm({
                     value={arrivalTime}
                     onChange={(e) => setArrivalTime(e.target.value)}
                     placeholder="0"
-                    className="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full neu-pressed px-4 py-3 text-slate-700 font-bold focus:outline-none"
                 />
             </div>
 
             {/* Burst Time */}
             <div>
-                <label className="block text-sm text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
                     Burst Time
                 </label>
                 <input
@@ -90,14 +108,14 @@ function ProcessForm({
                     value={burstTime}
                     onChange={(e) => setBurstTime(e.target.value)}
                     placeholder="5"
-                    className="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full neu-pressed px-4 py-3 text-slate-700 font-bold focus:outline-none"
                 />
             </div>
 
             {/* Priority */}
             {isPriorityAlgo && (
                 <div>
-                    <label className="block text-sm text-slate-300 mb-1">
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
                         Priority
                     </label>
                     <input
@@ -105,50 +123,31 @@ function ProcessForm({
                         min="0"
                         value={priority}
                         onChange={(e) => setPriority(e.target.value)}
-                        placeholder="Lower number = higher priority"
-                        className="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="0 (Lower = Higher)"
+                        className="w-full neu-pressed px-4 py-3 text-slate-700 font-bold focus:outline-none"
                     />
                 </div>
             )}
 
-            {/* Time Quantum */}
-            {isRR && (
-                <div>
-                    <label className="block text-sm text-slate-300 mb-1">
-                        Time Quantum
-                    </label>
-                    <input
-                        type="number"
-                        min="1"
-                        placeholder="2"
-                        onChange={(e) => {
-                            const value = Number(e.target.value);
-                            if (value > 0) {
-                                onSetTimeQuantum(value);
-                            }
-                        }}
-                        className="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                </div>
-            )}
+
 
             {/* Color Picker */}
-            <div className="flex items-center gap-4">
-                <label className="text-sm text-slate-300">
+            <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                     Process Color
                 </label>
                 <input
                     type="color"
                     value={color}
                     onChange={(e) => setColor(e.target.value)}
-                    className="h-10 w-16 rounded-md border border-slate-700 bg-slate-800"
+                    className="h-10 w-16 neu-pressed cursor-pointer bg-transparent"
                 />
             </div>
 
             {/* Submit */}
             <button
                 type="submit"
-                className="w-full rounded-md bg-blue-600 hover:bg-blue-500 text-white py-2 font-semibold transition"
+                className="w-full py-3 mt-4 text-sm font-bold neu-btn-primary"
             >
                 Add Process
             </button>

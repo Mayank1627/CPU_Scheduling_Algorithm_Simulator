@@ -7,73 +7,110 @@ export function roundRobinScheduler(processes, timeQuantum = 2) {
     remainingTime: p.burstTime,
     startTime: null,
     completionTime: null,
+    timeInQuantum: 0,
   }));
 
   const timeline = [];
-  const readyQueue = [];
   let currentTime = 0;
   let completed = 0;
   const n = procList.length;
 
+  let currentProc = null;
+  let blockStart = 0;
+  let readyQueue = [];
+
   procList.sort((a, b) => a.arrivalTime - b.arrivalTime);
 
-  let i = 0;
-
   while (completed < n) {
-    while (i < n && procList[i].arrivalTime <= currentTime) {
-      readyQueue.push(procList[i]);
-      i++;
+    // 1. Handle new arrivals
+    const arrivals = procList.filter((p) => p.arrivalTime === currentTime);
+    for (const p of arrivals) {
+      readyQueue.push(p);
     }
 
-    if (readyQueue.length === 0) {
-      const nextArrival = procList[i].arrivalTime;
+    // 2. Check current process status (finished or exhausted quantum)
+    let needsSwitch = false;
+    let preempted = false;
 
-      timeline.push(
-        createTimelineBlock({
-          pid: "IDLE",
-          start: currentTime,
-          end: nextArrival,
-          color: "#ffffff",
-        })
-      );
-
-      currentTime = nextArrival;
-      continue;
+    if (currentProc !== null && currentProc.id !== "IDLE") {
+      if (currentProc.remainingTime === 0) {
+        currentProc.completionTime = currentTime;
+        completed++;
+        needsSwitch = true;
+      } else if (currentProc.timeInQuantum === timeQuantum) {
+        readyQueue.push(currentProc);
+        currentProc.timeInQuantum = 0;
+        needsSwitch = true;
+        preempted = true;
+      }
+    } else if (currentProc !== null && currentProc.id === "IDLE") {
+      needsSwitch = true;
     }
 
-    const proc = readyQueue.shift();
-
-    if (proc.startTime === null) {
-      proc.startTime = currentTime;
+    // If we just completed the last process, break out so we don't log an extra tick
+    if (completed === n) {
+      break;
     }
 
-    const execTime = Math.min(timeQuantum, proc.remainingTime);
-    const start = currentTime;
-    const end = currentTime + execTime;
+    // 3. Select next process
+    let nextProc = currentProc;
+    if (currentProc === null || needsSwitch) {
+      nextProc = readyQueue.length > 0 ? readyQueue.shift() : null;
+      if (nextProc) {
+        nextProc.timeInQuantum = 0; // ensure reset
+      }
+    }
 
+    // Logging for debugging
+    const readyStr = `[${readyQueue.map(p => p.id).join(", ")}]`;
+    let event = "CONTINUE";
+    if (currentProc === null && nextProc !== null) event = "DISPATCH";
+    else if (preempted && nextProc !== null) event = "PREEMPT";
+    else if (needsSwitch && nextProc !== null) event = "DISPATCH";
+    
+    console.log(`[ t=${currentTime} ] Running: ${nextProc ? nextProc.id : 'IDLE'} (rem: ${nextProc ? nextProc.remainingTime : '-'}) | Ready: ${readyStr} | Event: ${event}`);
+
+    // Update timeline
+    if (currentProc !== nextProc || (preempted && currentProc === nextProc)) {
+      if (currentProc !== null) {
+        timeline.push(
+          createTimelineBlock({
+            pid: currentProc.id,
+            start: blockStart,
+            end: currentTime,
+            color: currentProc.id === "IDLE" ? "#ffffff" : currentProc.color,
+          })
+        );
+      }
+      blockStart = currentTime;
+      currentProc = nextProc;
+    }
+
+    // 4. Execute
+    if (currentProc !== null) {
+      if (currentProc.startTime === null) {
+        currentProc.startTime = currentTime;
+      }
+      currentProc.remainingTime--;
+      currentProc.timeInQuantum++;
+    } else {
+      // CPU is idle
+      currentProc = { id: "IDLE", remainingTime: 0, timeInQuantum: 0, color: "#ffffff" };
+    }
+
+    currentTime++;
+  }
+
+  // Push the last block
+  if (currentProc !== null) {
     timeline.push(
       createTimelineBlock({
-        pid: proc.id,
-        start,
-        end,
-        color: proc.color,
+        pid: currentProc.id,
+        start: blockStart,
+        end: currentTime,
+        color: currentProc.id === "IDLE" ? "#ffffff" : currentProc.color,
       })
     );
-
-    proc.remainingTime -= execTime;
-    currentTime = end;
-
-    while (i < n && procList[i].arrivalTime <= currentTime) {
-      readyQueue.push(procList[i]);
-      i++;
-    }
-
-    if (proc.remainingTime > 0) {
-      readyQueue.push(proc);
-    } else {
-      proc.completionTime = currentTime;
-      completed++;
-    }
   }
 
   const finalizedProcesses = procList.map((p) => {

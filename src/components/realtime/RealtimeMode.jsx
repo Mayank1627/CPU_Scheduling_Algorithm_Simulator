@@ -15,24 +15,11 @@ import SwimlaneVisualizer from './SwimlaneVisualizer.jsx';
 import PcbInspector from './PcbInspector.jsx';
 import { useRealtimeSimulation } from '../../hooks/useRealtimeSimulation.js';
 
-function RealtimeMode({ onExitMode }) {
-    const [processes, setProcesses] = useState([]);
+function RealtimeMode({ onExitMode, processes, onAddProcess, onDeleteProcess, onClearAll }) {
     const [phase, setPhase] = useState('setup'); // 'setup' | 'simulation'
     const [selectedPid, setSelectedPid] = useState(null);
 
     const sim = useRealtimeSimulation(processes);
-
-    const handleAddProcess = useCallback((processData) => {
-        setProcesses((prev) => [...prev, processData]);
-    }, []);
-
-    const handleDeleteProcess = useCallback((pid) => {
-        setProcesses((prev) => prev.filter((p) => p.pid !== pid));
-    }, []);
-
-    const handleClearAll = useCallback(() => {
-        setProcesses([]);
-    }, []);
 
     const handleStartSimulation = () => {
         if (processes.length === 0) return;
@@ -48,95 +35,71 @@ function RealtimeMode({ onExitMode }) {
 
     const existingPids = processes.map((p) => p.pid);
 
-    // ── SETUP PHASE ─────────────────────────────────────────────
-    if (phase === 'setup') {
-        return (
-            <div className="w-full max-w-[1600px] mx-auto space-y-10">
-                {/* Header row with back button */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">
-                            Process States
-                        </h2>
-                        <p className="text-slate-700 mt-1">
-                            Define processes with CPU/I/O burst sequences, then watch them execute live.
-                        </p>
-                    </div>
-                    <button
-                        onClick={onExitMode}
-                        className="px-5 py-2.5 rounded-lg bg-slate-200 text-slate-700 font-semibold hover:bg-slate-300 transition"
-                    >
-                        ← Back to Static Mode
-                    </button>
-                </div>
-
-                {/* Form + Table */}
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
+    // ── LAYOUT ─────────────────────────────────────────────
+    return (
+        <div className="flex-1 flex gap-6 overflow-hidden">
+            {/* ── Left Sidebar (Configuration) ────────────────────── */}
+            <aside className="w-[320px] shrink-0 flex flex-col gap-6 overflow-y-auto pr-2">
+                <div className="neu-extruded p-5 rounded-[16px] flex-1">
                     <BurstSequenceBuilder
-                        onAddProcess={handleAddProcess}
+                        onAddProcess={onAddProcess}
                         existingPids={existingPids}
                     />
+                </div>
+
+                <div className="flex gap-4 mt-auto mb-4">
+                    {phase === 'setup' ? (
+                        <button
+                            onClick={handleStartSimulation}
+                            disabled={processes.length === 0}
+                            className="flex-1 py-3 text-sm font-bold btn-start-sim disabled:opacity-40 disabled:shadow-none"
+                        >
+                            ▶ Start Simulation
+                        </button>
+                    ) : (
+                        <button
+                            onClick={handleBackToSetup}
+                            className="flex-1 py-3 text-sm font-bold neu-btn text-amber-600"
+                        >
+                            ■ Stop Simulation
+                        </button>
+                    )}
+                </div>
+            </aside>
+
+            {/* ── Center Workspace (Main Canvas) ──────────────────── */}
+            <main className="flex-1 flex flex-col gap-6 clean-scroll pr-2 pb-6">
+                {/* Process List Table */}
+                <div className="shrink-0 neu-extruded p-6 rounded-[16px] w-full">
                     <RealtimeProcessTable
                         processes={processes}
-                        onDeleteProcess={handleDeleteProcess}
-                        onClearAll={handleClearAll}
+                        onDeleteProcess={phase === 'setup' ? onDeleteProcess : undefined}
+                        onClearAll={phase === 'setup' ? onClearAll : undefined}
+                        readOnly={phase === 'simulation'}
                     />
                 </div>
 
-                {/* Start Simulation button */}
-                <div className="flex justify-center">
-                    <button
-                        onClick={handleStartSimulation}
-                        disabled={processes.length === 0}
-                        className="px-14 py-4 text-lg rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold hover:from-cyan-500 hover:to-blue-500 transition shadow-lg shadow-cyan-500/25 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
-                    >
-                        ▶ Start Real-Time Simulation
-                    </button>
-                </div>
-            </div>
-        );
-    }
+                {/* Simulation Panel */}
+                {phase === 'simulation' && (
+                    <div className="flex-1 flex flex-col min-h-0">
+                        <SwimlaneVisualizer
+                            snapshot={sim.snapshot}
+                            isRunning={sim.isRunning}
+                            isComplete={sim.isComplete}
+                            speed={sim.speed}
+                            onPlay={sim.play}
+                            onPause={sim.pause}
+                            onStep={sim.step}
+                            onStepBack={sim.stepBack}
+                            onReset={sim.reset}
+                            onSetSpeed={sim.setSpeed}
+                            selectedPid={selectedPid}
+                            onSelectProcess={setSelectedPid}
+                        />
+                    </div>
+                )}
+            </main>
 
-    // ── SIMULATION PHASE ────────────────────────────────────────
-    return (
-        <div className="w-full max-w-[1600px] mx-auto space-y-6">
-            {/* Header with back button */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">
-                        Live Simulation
-                    </h2>
-                    <p className="text-slate-500 mt-1">
-                        {processes.length} process{processes.length !== 1 ? 'es' : ''} •
-                        {sim.isComplete ? ' Simulation complete' : ' Running…'}
-                    </p>
-                </div>
-                <button
-                    onClick={handleBackToSetup}
-                    className="px-5 py-2.5 rounded-lg bg-slate-200 text-slate-700 font-semibold hover:bg-slate-300 transition"
-                >
-                    ← Back to Setup
-                </button>
-            </div>
-
-            {/* Summary Table */}
-            <RealtimeProcessTable processes={processes} readOnly={true} />
-
-            {/* Swimlane Visualizer */}
-            <SwimlaneVisualizer
-                snapshot={sim.snapshot}
-                isRunning={sim.isRunning}
-                isComplete={sim.isComplete}
-                speed={sim.speed}
-                onPlay={sim.play}
-                onPause={sim.pause}
-                onStep={sim.step}
-                onStepBack={sim.stepBack}
-                onReset={sim.reset}
-                onSetSpeed={sim.setSpeed}
-                selectedPid={selectedPid}
-                onSelectProcess={setSelectedPid}
-            />
 
             {/* PCB Inspector Overlay */}
             <PcbInspector

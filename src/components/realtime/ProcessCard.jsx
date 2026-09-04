@@ -38,46 +38,46 @@ function ProcessCard({ process, showProgress = false, isSelected = false, onClic
         : '';
 
     // Starvation level calculation — only applies visually in READY state
-    let starvationClass = '';
-    let starvationBorderColor = undefined;
+    let starvationStyle = {};
     if (waitingTime >= 5 && isInReady) {
         const excess = waitingTime - 5; // 0 at exactly 5s
         const level = Math.min(excess, 5); // cap at 5 extra levels
-        if (level === 0) {
-            starvationClass = 'rt-card-starving-warn';
-        } else {
-            starvationClass = `rt-card-starving-critical rt-card-starving-level-${level}`;
-        }
         // Interpolate yellow (#fbbf24) → red (#ef4444)
         const r = Math.round(251 + (239 - 251) * (level / 5));
         const g = Math.round(191 - 191 * (level / 5));
         const b_val = Math.round(36 + (68 - 36) * (level / 5));
-        starvationBorderColor = `rgb(${r}, ${g}, ${b_val})`;
+        const colorVal = `rgb(${r}, ${g}, ${b_val})`;
+        starvationStyle = {
+            boxShadow: `0 0 10px ${colorVal}, inset 0 0 4px ${colorVal}`,
+            borderColor: colorVal,
+            color: colorVal
+        };
     }
 
     return (
         <div
-            className={`rt-process-card ${starvationClass} ${onClick ? 'rt-process-card-interactive' : ''} ${isSelected ? 'rt-process-card-selected' : ''}`}
+            className={`relative flex flex-col min-w-[120px] rounded-lg overflow-hidden transition-transform duration-150 cursor-pointer ${isSelected ? 'ring-2 ring-blue-400' : ''} ${onClick ? 'hover:-translate-y-0.5' : ''} neu-extruded`}
             onClick={onClick}
             style={{
-                '--process-color': color,
-                '--starve-color': starvationBorderColor,
                 viewTransitionName: `process-${pid}`,
+                ...starvationStyle
             }}
         >
-            <div className="rt-card-main">
+            <div className="flex items-stretch min-h-[40px]">
                 {/* Color PID Block */}
-                <div className="rt-card-pid-block">
+                <div className="flex items-center justify-center px-3 font-['JetBrains_Mono'] text-sm font-extrabold text-slate-800" style={{ backgroundColor: color }}>
                     {pid}
                 </div>
 
-                <div className="rt-card-content">
+                <div className="flex items-center gap-1.5 px-2 py-1 flex-1 bg-transparent">
                     {/* Burst info */}
                     {!isTerminated && currentBurst && (
-                        <span className="rt-card-burst-info">{burstLabel}</span>
+                        <span className="font-['JetBrains_Mono'] text-[10px] font-bold bg-gray-100 text-black px-1.5 py-0.5 rounded-sm" style={{ backgroundColor: '#f3f4f6', color: '#000000' }}>
+                            {burstLabel}
+                        </span>
                     )}
                     {isTerminated && (
-                        <svg className="rt-card-done-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <svg className="shrink-0 ml-auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="20 6 9 17 4 12" />
                         </svg>
                     )}
@@ -86,20 +86,35 @@ function ProcessCard({ process, showProgress = false, isSelected = false, onClic
 
             {/* Waiting time indicator — only in Ready Queue */}
             {waitingTime > 0 && isInReady && (
-                <div className="rt-card-wait-indicator" style={starvationBorderColor ? { color: starvationBorderColor } : {}}>
+                <div
+                    className="flex items-center gap-1 px-2 py-1 font-['JetBrains_Mono'] text-[10px] font-bold tracking-wider border-t border-slate-700/50 bg-[#0f172a]"
+                    style={{
+                        color: starvationStyle.color || '#ffffff'
+                    }}
+                >
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
                     </svg>
                     WAIT: {waitingTime}s
-                    {waitingTime >= 5 && <span className="rt-card-starving-label">STARVING</span>}
+                    {waitingTime >= 5 && (
+                        <span
+                            className="ml-1 px-1 text-[8px] font-extrabold uppercase rounded-sm border text-white"
+                            style={{
+                                borderColor: starvationStyle.color,
+                                backgroundColor: starvationStyle.color ? `${starvationStyle.color.replace('rgb', 'rgba').replace(')', ', 0.2)')}` : 'rgba(239, 68, 68, 0.2)'
+                            }}
+                        >
+                            STARVING
+                        </span>
+                    )}
                 </div>
             )}
 
             {/* Progress bar */}
             {showProgress && bursts && bursts.length > 0 && (
-                <div className="rt-card-progress-track">
+                <div className="h-[3px] bg-slate-200 overflow-hidden">
                     <div
-                        className="rt-card-progress-fill"
+                        className="h-full bg-emerald-500 transition-[width] duration-250 ease-linear shadow-[0_0_6px_rgba(16,185,129,0.5)]"
                         style={{
                             width: `${progressPercent}%`
                         }}

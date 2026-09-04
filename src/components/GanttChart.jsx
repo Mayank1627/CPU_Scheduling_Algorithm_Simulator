@@ -20,12 +20,12 @@ function GanttChart({ timeline }) {
     const ticks = Array.from({ length: totalTime + 1 }, (_, i) => i);
 
     return (
-        <div className="bg-slate-900 p-6 rounded-xl shadow-lg">
-            <h2 className="text-3xl font-bold font-[monospace] text-slate-100 mb-4 text-center">
+        <div className="flex flex-col h-full">
+            <h2 className="text-lg font-bold text-slate-700 uppercase tracking-wide mb-6 text-center">
                 Gantt Chart
             </h2>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto w-full flex-1 flex items-center justify-center neu-pressed rounded-xl p-4">
                 <svg
                     width="100%"
                     height={LABEL_Y + 24}
@@ -45,10 +45,12 @@ function GanttChart({ timeline }) {
                                     y={TOP_MARGIN}
                                     width={width}
                                     height={BAR_HEIGHT}
-                                    fill={isIdle ? "#ffffff" : block.color}
-                                    opacity={isIdle ? 0.5 : 1}
-                                    stroke="#020617"
-                                    rx={4}
+                                    fill={isIdle ? "#B5BAC4" : block.color}
+                                    opacity={1}
+                                    stroke={isIdle ? "#cbd5e1" : "rgba(0,0,0,0.1)"}
+                                    strokeWidth="2"
+                                    rx={8}
+                                    className={!isIdle ? "drop-shadow-sm" : ""}
                                 >
                                     {/* Tooltip */}
                                     <title>
@@ -63,7 +65,7 @@ Duration: ${block.end - block.start}`}
                                 <text
                                     x={x + width / 2}
                                     y={TOP_MARGIN + BAR_HEIGHT / 2}
-                                    fill="#020617"
+                                    fill={isIdle ? "#334155" : "#ffffff"}
                                     fontSize="14"
                                     fontWeight="bold"
                                     textAnchor="middle"
@@ -82,7 +84,7 @@ Duration: ${block.end - block.start}`}
                         y1={AXIS_Y}
                         x2={SVG_BASE_WIDTH}
                         y2={AXIS_Y}
-                        stroke="#e5e7eb"
+                        stroke="#94a3b8"
                         strokeWidth="2"
                     />
 
@@ -96,20 +98,19 @@ Duration: ${block.end - block.start}`}
                                     y1={AXIS_Y}
                                     x2={x}
                                     y2={AXIS_Y + 6}
-                                    stroke="#e5e7eb"
+                                    stroke="#94a3b8"
                                 />
                                 <text
                                     x={x}
                                     y={LABEL_Y}
-                                    fill="#07f2f2"
-                                    fontSize="14"
+                                    fill="#64748b"
+                                    fontSize="12"
                                     fontWeight="bold"
+                                    fontFamily="JetBrains Mono"
                                     textAnchor="middle"
                                 >
                                     {t}
                                 </text>
-
-
                             </g>
                         );
                     })}

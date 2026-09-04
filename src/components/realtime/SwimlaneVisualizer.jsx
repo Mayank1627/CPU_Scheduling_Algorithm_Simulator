@@ -93,25 +93,25 @@ function SwimlaneVisualizer({
         const isActive = processes.length > 0;
 
         return (
-            <div className={`rt-lane rt-lane-${laneKey} ${isActive ? 'rt-lane-active' : ''}`}>
-                <div className="rt-lane-header">
-                    <span className="rt-lane-icon"><Icon /></span>
-                    <span className="rt-lane-label">{meta.label}</span>
+            <div className={`rt-lane rt-lane-${laneKey} ${isActive ? 'rt-lane-active' : ''} neu-pressed rounded-xl p-3 flex flex-col h-auto bg-transparent`}>
+                <div className="flex items-center gap-2 mb-3 text-slate-200 font-bold text-xs tracking-wider uppercase shrink-0">
+                    <span className="text-slate-300"><Icon /></span>
+                    <span>{meta.label}</span>
                     {processes.length > 0 && (
-                        <span className="rt-lane-count">{processes.length}</span>
+                        <span className="ml-auto neu-extruded px-2 py-0.5 rounded text-[10px] text-slate-700">{processes.length}</span>
                     )}
                 </div>
-                <div className="rt-lane-content">
+                <div className="flex flex-col gap-2 pb-2">
                     {processes.length === 0 ? (
                         laneKey === 'running' && snapshot.currentTime > 0 && !snapshot.isComplete ? (
-                            <div className="rt-cpu-idle">IDLE</div>
+                            <div className="rt-idle-text flex items-center justify-center font-bold uppercase tracking-widest text-m py-4" style={{ color: '#FFBF00' }}>IDLE</div>
                         ) : (
-                            <span className="rt-lane-empty">{meta.emptyText}</span>
+                            <span className="text-slate-400 text-xs italic">{meta.emptyText}</span>
                         )
                     ) : (
-                        <div className={`rt-lane-processes ${laneKey === 'terminated' ? 'rt-lane-processes-vertical' : ''}`}>
+                        <div className="flex flex-col gap-2">
                             {processes.map((proc, idx) => (
-                                <div key={proc.pid} className="rt-lane-process-wrapper">
+                                <div key={proc.pid} className="flex flex-col items-center">
                                     <ProcessCard
                                         process={proc}
                                         showProgress={shouldShowProgress(laneKey)}
@@ -119,7 +119,7 @@ function SwimlaneVisualizer({
                                         onClick={() => onSelectProcess(proc.pid)}
                                     />
                                     {laneKey === 'terminated' && idx < processes.length - 1 && (
-                                        <div className="rt-terminated-arrow">
+                                        <div className="text-slate-400 my-2">
                                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                                 <line x1="12" y1="4" x2="12" y2="20" />
                                                 <polyline points="18 14 12 20 6 14" />
@@ -136,73 +136,89 @@ function SwimlaneVisualizer({
     };
 
     return (
-        <div className="rt-swimlane-container">
-            {/* Playback Controls */}
-            <PlaybackControls
-                currentTime={snapshot.currentTime}
-                isRunning={isRunning}
-                isComplete={isComplete}
-                speed={speed}
-                onPlay={onPlay}
-                onPause={onPause}
-                onStep={onStep}
-                onStepBack={onStepBack}
-                onReset={onReset}
-                onSetSpeed={onSetSpeed}
-            />
+        <div className="flex-1 flex flex-col gap-5 min-h-0">
+            {/* ── Playback Control Bar (inline, not portaled) ──────── */}
+            <div className="rt-playback-bar shrink-0">
+                <PlaybackControls
+                    currentTime={snapshot.currentTime}
+                    isRunning={isRunning}
+                    isComplete={isComplete}
+                    speed={speed}
+                    onPlay={onPlay}
+                    onPause={onPause}
+                    onStep={onStep}
+                    onStepBack={onStepBack}
+                    onReset={onReset}
+                    onSetSpeed={onSetSpeed}
+                />
+            </div>
 
             {/* ── Process States — Spatial Grid Layout ──────────────── */}
-            <div className="rt-states-section">
-                <h3 className="rt-states-heading">Process States</h3>
-                <div className="rt-states-grid">
+            <div className="rt-simulation-canvas flex-1 flex flex-col gap-4 min-h-0">
+                {/* Schematic Heading */}
+                <div 
+                    className="absolute top-4 left-4 font-['JetBrains_Mono'] text-[0.8rem] uppercase tracking-[1.5px] text-slate-200 font-bold z-10 pointer-events-none"
+                >
+                    PROCESS STATES
+                </div>
+
+                <div className="rt-states-grid flex-1 min-h-0 mt-8">
                     {/* Left column */}
                     <div className="rt-grid-left">
                         {renderLane('arriving')}
-                        <div className="rt-grid-arrow rt-arrow-down">
+                        <div className="rt-grid-arrow rt-arrow-down text-slate-300">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
                         </div>
                         {renderLane('readyQueue')}
                     </div>
 
                     {/* Center — arrows + CPU */}
-                    <div className="rt-grid-center">
-                        <div className="rt-grid-arrow rt-arrow-right">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                            <span className="rt-arrow-label">dispatch</span>
-                        </div>
+                    <div className="rt-grid-arrow rt-arrow-right text-slate-300" style={{ alignSelf: 'start', marginTop: '140px' }}>
+                        <span className="rt-arrow-label text-slate-200 font-bold uppercase tracking-wider text-[10px] mb-1 relative left-4">dispatch</span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: 'rotate(-45deg)' }}>
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </div>
+
+                    <div className="rt-grid-center mt-20" style={{ flexDirection: 'column', justifyContent: 'center' }}>
                         {renderLane('running')}
-                        <div className="rt-grid-arrow rt-arrow-right">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                            <span className="rt-arrow-label">exit</span>
+                        {/* I/O Blocked — below CPU */}
+                        <div className="rt-grid-bottom mt-10">
+                            <div className="rt-grid-arrow-group text-slate-300">
+                                <div className="rt-grid-arrow rt-arrow-down">
+                                    <span className="rt-arrow-label text-slate-200 font-bold uppercase tracking-wider text-[10px] mb-2">I/O wait</span>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
+                                </div>
+                            </div>
+                            <div className="flex-1">
+                                {renderLane('blocked')}
+                            </div>
+                            <div className="rt-grid-arrow-group text-slate-300">
+                                <div className="rt-grid-arrow rt-arrow-up">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
+                                    <span className="rt-arrow-label text-slate-200 font-bold uppercase tracking-wider text-[10px]">I/O done</span>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+
+                    {/* Exit arrow */}
+                    <div className="rt-grid-arrow rt-arrow-right text-slate-300" style={{ alignSelf: 'start', marginTop: '140px' }}>
+                        <span className="rt-arrow-label text-slate-200 font-bold uppercase tracking-wider text-[10px] mb-1">exit</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                     </div>
 
                     {/* Right column — Terminated */}
-                    <div className="rt-grid-right">
+                    <div className="rt-grid-right mt-12">
                         {renderLane('terminated')}
-                    </div>
-                </div>
-
-                {/* I/O Blocked — Bottom span */}
-                <div className="rt-grid-bottom">
-                    <div className="rt-grid-arrow-group">
-                        <div className="rt-grid-arrow rt-arrow-down">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
-                            <span className="rt-arrow-label">I/O wait</span>
-                        </div>
-                    </div>
-                    {renderLane('blocked')}
-                    <div className="rt-grid-arrow-group">
-                        <div className="rt-grid-arrow rt-arrow-up">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
-                            <span className="rt-arrow-label">I/O done</span>
-                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Event Log */}
-            <EventLog events={snapshot.events} />
+            {/* ── Event Log ────────────────────────────────────────── */}
+            <div className="shrink-0 h-40 rt-event-log-wrapper">
+                <EventLog events={snapshot.events} />
+            </div>
         </div>
     );
 }
