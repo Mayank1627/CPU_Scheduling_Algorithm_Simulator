@@ -105,11 +105,13 @@ label, .uppercase {
 
 /* Primary Call-to-Action Button ("Simulate", "Add Process") */
 .neu-btn-primary {
+    font-family: 'Fredoka', cursive, sans-serif !important;
     background: var(--primary-cta);
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 600;
+    letter-spacing: 0.5px;
     color: #ffffff !important;
     box-shadow: 
         7px 7px 14px rgba(163, 177, 198, 0.7), 
@@ -181,6 +183,10 @@ svg text {
     color: #0f172a !important; /* dark black text */
 }
 
+.algo-selector-btn .algo-selected-name {
+    color: #059669 !important; /* Emerald green text for selected algorithm */
+}
+
 .algo-card {
     background-color: #374151 !important; /* Tailwind gray-700 */
     border-radius: 12px;
@@ -212,12 +218,14 @@ svg text {
 /* Simulate & Start Simulation button (#3CB371) */
 .btn-simulate,
 .btn-start-sim {
-    background-color: #3CB371 !important;
+    font-family: 'Fredoka', cursive, sans-serif !important;
+    background-color: #2dc653 !important;
     color: #0f172a !important;
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 600;
+    letter-spacing: 0.5px;
     box-shadow: 
         6px 6px 12px rgba(163, 177, 198, 0.6), 
         -6px -6px 12px rgba(255, 255, 255, 0.6);
@@ -242,12 +250,14 @@ svg text {
 
 /* Compare All button (#E8E368) */
 .btn-compare {
-    background-color: #D9D68B !important;
+    font-family: 'Fredoka', cursive, sans-serif !important;
+    background-color: #fdd85d !important;
     color: #0f172a !important;
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 600;
+    letter-spacing: 0.5px;
     box-shadow: 
         6px 6px 12px rgba(163, 177, 198, 0.6), 
         -6px -6px 12px rgba(255, 255, 255, 0.6);
@@ -615,6 +625,11 @@ svg text {
 
 .rt-event-log-wrapper .text-slate-600 {
     color: #cbd5e1 !important;
+}
+
+.rt-event-log-wrapper .text-white.uppercase,
+.rt-event-log-wrapper .text-white {
+    color: #ffffff !important;
 }
 
 .rt-event-log-wrapper .neu-pressed {

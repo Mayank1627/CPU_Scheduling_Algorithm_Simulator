@@ -201,8 +201,8 @@ function App() {
             {/* ── Top Command Bar (Sticky Header) ─────────────────── */}
             <header className="shrink-0 flex items-center justify-between px-8 py-4 neu-extruded mx-6 my-4 rounded-2xl z-10">
                 <div>
-                    <h1 className="text-xl font-extrabold tracking-tight font-['Inter'] text-slate-700">
-                        CPU Allocation & Process State Tracing Engine
+                    <h1 className="text-2xl font-extrabold tracking-tight font-['Space_Grotesk'] bg-gradient-to-r from-slate-800 via-indigo-900 to-slate-700 bg-clip-text text-transparent flex items-center gap-2">
+                        <span>CPU Allocation & Process State Tracing Engine</span>
                     </h1>
                 </div>
 

@@ -216,7 +216,7 @@ function SwimlaneVisualizer({
             </div>
 
             {/* ── Event Log ────────────────────────────────────────── */}
-            <div className="shrink-0 h-40 rt-event-log-wrapper">
+            <div className="shrink-0 h-64 rt-event-log-wrapper">
                 <EventLog events={snapshot.events} />
             </div>
         </div>

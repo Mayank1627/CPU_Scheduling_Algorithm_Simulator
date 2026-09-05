@@ -19,11 +19,6 @@ const IconTerminal = () => (
         <polyline points="4 17 10 11 4 5" /><line x1="12" y1="19" x2="20" y2="19" />
     </svg>
 );
-const IconCopy = () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-    </svg>
-);
 const IconExpand = () => (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" />
@@ -32,16 +27,6 @@ const IconExpand = () => (
 const IconCollapse = () => (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="4 14 10 14 10 20" /><polyline points="20 10 14 10 14 4" /><line x1="14" y1="10" x2="21" y2="3" /><line x1="3" y1="21" x2="10" y2="14" />
-    </svg>
-);
-const IconScrollDown = () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 5v14M5 12l7 7 7-7" />
-    </svg>
-);
-const IconCheck = () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="20 6 9 17 4 12" />
     </svg>
 );
 const IconClock = () => (
@@ -61,40 +46,40 @@ function parseEvent(rawText, index) {
 
     let category = 'system';
     let badgeLabel = 'SYS';
-    let badgeColor = 'text-slate-500 bg-slate-400/20';
+    let badgeColor = 'text-white bg-slate-500';
 
     if (rest.includes('terminated')) {
         category = 'term';
         badgeLabel = 'TERM';
-        badgeColor = 'text-purple-600 bg-purple-500/20';
+        badgeColor = 'text-white bg-purple-600';
     } else if (rest.includes('WARNING')) {
         category = 'warning';
         badgeLabel = 'WARN';
-        badgeColor = 'text-amber-600 bg-amber-500/20';
+        badgeColor = 'text-white bg-amber-600';
     } else if (rest.includes('INFO')) {
         category = 'info';
         badgeLabel = 'INFO';
-        badgeColor = 'text-blue-600 bg-blue-500/20';
+        badgeColor = 'text-white bg-blue-600';
     } else if (rest.includes('→ CPU') || (rest.includes('CPU') && !rest.includes('I/O'))) {
         category = 'cpu';
         badgeLabel = 'CPU';
-        badgeColor = 'text-emerald-600 bg-emerald-500/20';
+        badgeColor = 'text-white bg-emerald-600';
     } else if (rest.includes('I/O Device') || rest.includes('→ I/O')) {
         category = 'io';
         badgeLabel = 'I/O';
-        badgeColor = 'text-amber-600 bg-amber-500/20';
+        badgeColor = 'text-white bg-amber-500';
     } else if (rest.includes('I/O complete')) {
         category = 'io';
         badgeLabel = 'I/O DONE';
-        badgeColor = 'text-emerald-600 bg-emerald-500/20';
+        badgeColor = 'text-white bg-emerald-500';
     } else if (rest.includes('arrived')) {
         category = 'arrival';
         badgeLabel = 'ARR';
-        badgeColor = 'text-cyan-600 bg-cyan-500/20';
+        badgeColor = 'text-white bg-cyan-600';
     } else if (rest.includes('Ready Queue')) {
         category = 'ready';
         badgeLabel = 'READY';
-        badgeColor = 'text-indigo-600 bg-indigo-500/20';
+        badgeColor = 'text-white bg-indigo-600';
     }
 
     return { id: index, raw: rawText, time, pid, category, badgeLabel, badgeColor, message: rest };
@@ -105,9 +90,7 @@ function EventLog({ events = [] }) {
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [selectedPid, setSelectedPid] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
-    const [autoScroll, setAutoScroll] = useState(true);
     const [isExpanded, setIsExpanded] = useState(false);
-    const [copied, setCopied] = useState(false);
 
     const parsedEvents = useMemo(() => events.map((ev, i) => parseEvent(ev, i)), [events]);
 
@@ -141,23 +124,15 @@ function EventLog({ events = [] }) {
     }, [parsedEvents]);
 
     useEffect(() => {
-        if (autoScroll && scrollContainerRef.current) {
+        if (scrollContainerRef.current) {
             scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
         }
-    }, [filteredEvents.length, autoScroll]);
-
-    const handleCopyLogs = async () => {
-        try {
-            await navigator.clipboard.writeText(events.join('\n'));
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        } catch (err) { console.error('Failed to copy logs:', err); }
-    };
+    }, [filteredEvents.length]);
 
     const hasActiveFilters = categoryFilter !== 'all' || selectedPid !== 'all' || searchQuery !== '';
 
     return (
-        <div className={`flex flex-col h-full bg-transparent transition-all duration-300 ${isExpanded ? 'fixed inset-4 z-50 neu-extruded rounded-2xl p-6 bg-[#e0e5ec]' : ''}`}>
+        <div className={`flex flex-col h-full transition-all duration-300 ${isExpanded ? 'fixed inset-4 z-50 rounded-2xl p-6 bg-[#1e293b] shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-slate-700' : 'bg-transparent'}`}>
             {/* ── Title Bar ─────────────────────────────────────────── */}
             <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-white">
@@ -172,16 +147,6 @@ function EventLog({ events = [] }) {
                     <span className="neu-pressed px-2 py-0.5 rounded-md text-[10px] text-white" style={{ color: '#ffffff' }}>{events.length}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setAutoScroll(!autoScroll)}
-                        className={`p-1.5 rounded-md transition flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider ${autoScroll ? 'neu-pressed text-emerald-600' : 'neu-btn text-slate-400'}`}
-                        title={autoScroll ? 'Auto-scroll ON' : 'Auto-scroll OFF'}
-                    >
-                        <IconScrollDown /> {autoScroll ? 'ON' : 'OFF'}
-                    </button>
-                    <button onClick={handleCopyLogs} disabled={events.length === 0} className="p-1.5 rounded-md neu-btn text-slate-400 hover:text-slate-600 transition flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider disabled:opacity-50" title="Copy logs">
-                        {copied ? <><IconCheck /> Copied</> : <><IconCopy /> Copy</>}
-                    </button>
                     <button onClick={() => setIsExpanded(!isExpanded)} className="p-1.5 rounded-md neu-btn text-slate-400 hover:text-slate-600 transition flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider" title={isExpanded ? 'Compact' : 'Expand'}>
                         {isExpanded ? <IconCollapse /> : <IconExpand />}
                     </button>

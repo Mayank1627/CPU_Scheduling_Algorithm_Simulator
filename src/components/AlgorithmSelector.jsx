@@ -80,7 +80,7 @@ function AlgorithmSelector({ selected, onSelect }) {
 
                 {selectedAlgo && (
                     <div className="mt-1 text-center w-full">
-                        <p className="text-base font-extrabold">
+                        <p className="algo-selected-name text-base font-extrabold text-emerald-600">
                             {selectedAlgo.fullName}
                         </p>
                     </div>
