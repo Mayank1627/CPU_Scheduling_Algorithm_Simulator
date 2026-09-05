@@ -1,146 +1,54 @@
-# CPU Allocation & Process State Tracing Engine
+# CPU Allocation & Process State Analysis Engine
+*An interactive OS Process Execution & Telemetry Workbench.*
 
-An interactive web-based engine for visualizing and analyzing **CPU scheduling algorithms and process state tracing**.  
-This project helps understand how different scheduling strategies affect process execution, waiting time, turnaround time, and overall CPU performance.
+This project is a frontend-based Operating System process simulator designed to visualize scheduling algorithms, process lifecycles (PCBs), hardware interrupts, and context switching in real-time. It bridges the gap between theoretical algorithm math and practical kernel-level process management.
 
----
+## Core Architecture & Engineering
 
-## 🚀 Features
+- **Decoupled Engine**: The OS kernel logic (Scheduler, Dispatcher, Device queues) runs entirely independent of the React UI layer, outputting immutable state snapshots at every millisecond tick.
+- **Headless Invariant Testing**: The core scheduling math is fortified by a standalone Node.js test suite (`run-tests.js`) that bypasses the UI to test randomized process inputs against strict OS invariants (e.g., Turnaround Time = Completion Time - Arrival Time).
+- **Strict Neumorphic UI**: The frontend utilizes a tactile, "Soft UI" design system (`#e0e5ec` base) with a 100vh unified workspace that prevents main-body scrolling.
 
-- **Supported Algorithms**
-  - First Come First Serve (FCFS)
-  - Shortest Job First (SJF) – Non-Preemptive
-  - Shortest Remaining Time First (SRTF) – Preemptive
-  - Round Robin (RR) with configurable time quantum
-  - Priority Scheduling (Non-Preemptive)
+## Dual Execution Modes
 
-- **Process Management**
-  - Add and remove processes dynamically
-  - Custom arrival time, burst time, priority, and color
-  - Input validation (duplicate PIDs prevented)
+The application operates in two primary modes:
 
-- **Visualization**
-  - SVG-based Gantt Chart with idle time handling
-  - Clear execution timeline for each algorithm
+- **Execution Timeline View (Batch Analysis)**: A deterministic trace mode that calculates all scheduling metrics upfront, generating static Gantt charts and standard OS metrics tables (Turnaround Time, Waiting Time, CPU Utilization).
+- **Process State View (Live Execution)**: A decoupled, event-driven tick simulation with playback controls (Play, Pause, Step, Speed) that brings the OS scheduler to life.
 
-- **Statistics & Metrics**
-  - Per-process statistics:
-    - Completion Time
-    - Waiting Time
-    - Turnaround Time
-  - Global metrics:
-    - Average Waiting Time
-    - Average Turnaround Time
-    - CPU Utilization
-    - Throughput
+## Advanced Simulation Features
 
-- **Algorithm Comparison**
-  - Compare all algorithms on the same set of processes
-  - Side-by-side metric comparison table
+- **Interleaved CPU & I/O Bursts**: Processes are modeled as complex arrays of alternating CPU and I/O requests.
+- **Live Process Lifecycle Swimlanes**: Processes physically transition across a spatial CSS grid mapping the 5 core OS states (New, Ready Queue, CPU/Running, I/O/Blocked, Terminated).
+- **Process Control Block (PCB) Inspector**: A clickable, real-time side-panel drawer exposing the internal state of any process (Priority, Remaining Times, Live Wait Time, Burst Sequence Trace).
+- **Dynamic Starvation Detection**: Processes in the Ready Queue feature active wait-timers. If a process is ignored by the CPU for too long, the UI dynamically escalates visual warnings (Yellow to Red) to indicate CPU starvation.
+- **Global Progress Tracking**: A continuous progress bar that tracks the overall completion percentage of the total execution time (CPU + I/O combined) across all state transitions.
+- **System Event Telemetry**: An integrated, IDE-style terminal at the bottom of the workspace logging timestamped state transitions and dispatch resolutions.
 
-- **UI/UX**
-  - Responsive layout
-  - Clean system-style design
-  - Light grid background for better visual structure
+## Getting Started
 
----
+### Prerequisites
+- Node.js
 
-## 🧠 Why this project?
+### Installation
 
-CPU scheduling is a core concept in **Operating Systems**, but it’s often difficult to visualize.  
-This simulator bridges that gap by combining **visual execution timelines** with **quantitative performance metrics**, making learning more intuitive.
-
----
-
-## 🛠️ Tech Stack
-
-- **Frontend:** React (Vite)
-- **Styling:** Tailwind CSS
-- **Visualization:** SVG
-- **Language:** JavaScript (ES6+)
-
----
-
-## 📂 Project Structure
-
-src/
-├── components/
-│ ├── AlgorithmSelector.jsx
-│ ├── ProcessForm.jsx
-│ ├── ProcessTable.jsx
-│ ├── ProcessStatsTable.jsx
-│ ├── GanttChart.jsx
-│ └── ComparisonTable.jsx
-│
-├── core/
-│ ├── processModel.js
-│ ├── metrics.js
-│ └── schedulers/
-│ ├── fcfs.js
-│ ├── sjf.js
-│ ├── srtf.js
-│ ├── roundRobin.js
-│ └── priority.js
-│
-├── App.jsx
-└── main.jsx
-
-
----
-
-## ▶️ Running the Project Locally
-
-1. **Clone the repository**
+1. Clone the repository:
    ```bash
    git clone https://github.com/Mayank1627/CPU_Scheduling_Algorithm_Simulator.git
-Install dependencies
+   cd CPU_Scheduling_Algorithm_Simulator
+   ```
 
-npm install
-Run the development server
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-npm run dev
-Open the browser at:
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-http://localhost:5173
-📊 How to Use
-Select a scheduling algorithm
-
-Add processes (arrival time, burst time, priority if applicable)
-
-(For Round Robin) Set time quantum
-
-Click Simulate Algorithm to view:
-
-Gantt chart
-
-Per-process statistics
-
-Performance metrics
-
-Click Compare All Algorithms to compare metrics across algorithms
-
-⚠️ Notes
-Priority Scheduling uses lower number = higher priority
-
-All simulations are run on fresh process copies to avoid state leakage
-
-Idle CPU time is explicitly visualized
-
-📌 Future Improvements (Optional)
-Preemptive Priority Scheduling
-
-Context switch overhead simulation
-
-Export results as CSV/PDF
-
-Dark/Light mode toggle
-
-👤 Author
-Mayank
-GitHub: Mayank1627
-
-📄 License
-This project is for academic and educational purposes.
-
-
----
+4. Run the headless engine tests:
+   ```bash
+   node run-tests.js
+   ```
