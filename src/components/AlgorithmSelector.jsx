@@ -63,9 +63,12 @@ const ALGORITHMS = [
 ];
 
 
-function AlgorithmSelector({ selected, onSelect }) {
+function AlgorithmSelector({ selected, onSelect, allowedAlgorithms }) {
     const [open, setOpen] = useState(false);
     const selectedAlgo = ALGORITHMS.find(a => a.id === selected);
+    const displayAlgorithms = allowedAlgorithms 
+        ? ALGORITHMS.filter(a => allowedAlgorithms.includes(a.id))
+        : ALGORITHMS;
 
     return (
         <div className="w-full flex flex-col gap-4">
@@ -90,7 +93,7 @@ function AlgorithmSelector({ selected, onSelect }) {
             {/* Algorithm List */}
             {open && (
                 <div className="flex flex-col gap-3">
-                    {ALGORITHMS.map(algo => {
+                    {displayAlgorithms.map(algo => {
                         const isSelected = selected === algo.id;
                         return (
                             <div

@@ -49,6 +49,28 @@ export class Process {
     return burst.duration - this.burstProgress;
   }
 
+  /** Total duration of all bursts combined (CPU + I/O). */
+  getTotalBurstTime() {
+    return this.bursts.reduce((sum, b) => sum + b.duration, 0);
+  }
+
+  /** 
+   * Total remaining duration across all bursts combined.
+   * Includes remaining time on current burst + all future bursts. 
+   */
+  getTotalRemainingBurstTime() {
+    let remaining = 0;
+    if (this.burstIndex < this.bursts.length) {
+      // Remaining of current burst
+      remaining += this.bursts[this.burstIndex].duration - this.burstProgress;
+      // All subsequent bursts
+      for (let i = this.burstIndex + 1; i < this.bursts.length; i++) {
+        remaining += this.bursts[i].duration;
+      }
+    }
+    return remaining;
+  }
+
   /**
    * Advance to the next burst in the sequence.
    * Resets burstProgress to 0.
@@ -80,6 +102,8 @@ export class Process {
       totalBursts: this.bursts.length,
       bursts: this.bursts.map((b) => ({ ...b })),
       waitingTime: this.waitingTime,
+      completionTime: this.completionTime,
+      turnaroundTime: this.turnaroundTime,
     };
   }
 }

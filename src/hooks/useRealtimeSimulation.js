@@ -19,6 +19,7 @@ const SPEED_INTERVALS = {
 export function useRealtimeSimulation(processDefinitions) {
   const engineRef = useRef(null);
   const intervalRef = useRef(null);
+  const algorithmRef = useRef('FCFS');
 
   const [snapshot, setSnapshot] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
@@ -27,14 +28,16 @@ export function useRealtimeSimulation(processDefinitions) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   /** Initialize (or re-initialize) the engine from process definitions. */
-  const initialize = useCallback((definitions) => {
+  const initialize = useCallback((definitions, algorithm = 'FCFS') => {
+    algorithmRef.current = algorithm;
+
     // Stop any running playback
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
 
-    const engine = new RealtimeScheduler(definitions);
+    const engine = new RealtimeScheduler(definitions, algorithm);
     engineRef.current = engine;
 
     setSnapshot(engine.getInitialSnapshot());
@@ -101,7 +104,7 @@ export function useRealtimeSimulation(processDefinitions) {
     const targetTime = snapshot.currentTime - 1;
     
     // Fast-forward a fresh engine from 0 to targetTime
-    const freshEngine = new RealtimeScheduler(processDefinitions);
+    const freshEngine = new RealtimeScheduler(processDefinitions, algorithmRef.current);
     engineRef.current = freshEngine;
     
     let freshSnapshot = freshEngine.getInitialSnapshot();

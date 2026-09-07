@@ -17,12 +17,14 @@ import { createSystemSnapshot } from './SystemSnapshot.js';
 export class RealtimeScheduler {
   /**
    * @param {Array<{pid: string, arrivalTime: number, bursts: Array, color: string}>} processDefinitions
+   * @param {string} algorithm - 'FCFS', 'SJF', or 'SRTF'
    */
-  constructor(processDefinitions) {
+  constructor(processDefinitions, algorithm = 'FCFS') {
     // Build Process instances from definitions
     this.allProcesses = processDefinitions.map(
       (def) => new Process(def.pid, def.arrivalTime, def.bursts, def.color)
     );
+    this.algorithm = algorithm;
 
     this.cpu = new CPU();
     this.readyQueue = [];
@@ -73,6 +75,8 @@ export class RealtimeScheduler {
         if (nextBurst === null) {
           // No more bursts
           ioProcess.state = ProcessState.TERMINATED;
+          ioProcess.completionTime = this.currentTime;
+          ioProcess.turnaroundTime = ioProcess.completionTime - ioProcess.arrivalTime;
           this.terminatedList.push(ioProcess);
           tickEvents.push(`t=${this.currentTime}: ${ioProcess.pid} terminated (from I/O)`);
         } else if (nextBurst.type === 'IO') {
@@ -105,6 +109,8 @@ export class RealtimeScheduler {
         if (nextBurst === null) {
           // No more bursts — process terminates
           running.state = ProcessState.TERMINATED;
+          running.completionTime = this.currentTime;
+          running.turnaroundTime = running.completionTime - running.arrivalTime;
           this.terminatedList.push(running);
           tickEvents.push(`t=${this.currentTime}: ${running.pid} terminated`);
         } else if (nextBurst.type === 'IO') {
@@ -124,9 +130,28 @@ export class RealtimeScheduler {
       }
     }
 
-    // ── Step 4: Load next process onto CPU if idle ────────────────────
+    // ── Step 4: Sort Ready Queue and Handle Preemption ────────────────────
+    if (this.algorithm === 'SJF') {
+      this.readyQueue.sort((a, b) => a.getTotalBurstTime() - b.getTotalBurstTime());
+    } else if (this.algorithm === 'SRTF') {
+      this.readyQueue.sort((a, b) => a.getTotalRemainingBurstTime() - b.getTotalRemainingBurstTime());
+    }
+
+    if (this.algorithm === 'SRTF' && this.cpu.isBusy() && this.readyQueue.length > 0) {
+      const running = this.cpu.currentProcess;
+      const firstReady = this.readyQueue[0];
+      if (firstReady.getTotalRemainingBurstTime() < running.getTotalRemainingBurstTime()) {
+        const released = this.cpu.release();
+        released.state = ProcessState.READY;
+        this.readyQueue.push(released);
+        this.readyQueue.sort((a, b) => a.getTotalRemainingBurstTime() - b.getTotalRemainingBurstTime());
+        tickEvents.push(`t=${this.currentTime}: ${released.pid} PREEMPTED by ${firstReady.pid}`);
+      }
+    }
+
+    // ── Step 4b: Load next process onto CPU if idle ────────────────────
     if (!this.cpu.isBusy() && this.readyQueue.length > 0) {
-      const next = this.readyQueue.shift(); // FCFS: take front of queue
+      const next = this.readyQueue.shift(); // Take front of queue (FCFS, or already sorted)
       next.state = ProcessState.RUNNING;
       this.cpu.load(next);
       tickEvents.push(`t=${this.currentTime}: ${next.pid} → CPU`);
@@ -146,6 +171,11 @@ export class RealtimeScheduler {
           `t=${this.currentTime}: WARNING - ${proc.pid} has been waiting for 5s (Starvation Risk)`
         );
       }
+    }
+
+    // Increment waiting time for processes waiting for the I/O device (index >= 1)
+    for (let i = 1; i < this.blockedQueue.length; i++) {
+      this.blockedQueue[i].waitingTime++;
     }
 
     // ── Step 5: Advance time ──────────────────────────────────────────

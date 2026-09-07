@@ -13,17 +13,19 @@ import BurstSequenceBuilder from './BurstSequenceBuilder.jsx';
 import RealtimeProcessTable from './RealtimeProcessTable.jsx';
 import SwimlaneVisualizer from './SwimlaneVisualizer.jsx';
 import PcbInspector from './PcbInspector.jsx';
+import AlgorithmSelector from '../AlgorithmSelector.jsx';
 import { useRealtimeSimulation } from '../../hooks/useRealtimeSimulation.js';
 
 function RealtimeMode({ onExitMode, processes, onAddProcess, onDeleteProcess, onClearAll }) {
     const [phase, setPhase] = useState('setup'); // 'setup' | 'simulation'
     const [selectedPid, setSelectedPid] = useState(null);
+    const [selectedAlgorithm, setSelectedAlgorithm] = useState('FCFS');
 
     const sim = useRealtimeSimulation(processes);
 
     const handleStartSimulation = () => {
         if (processes.length === 0) return;
-        sim.initialize(processes);
+        sim.initialize(processes, selectedAlgorithm);
         setPhase('simulation');
     };
 
@@ -40,6 +42,15 @@ function RealtimeMode({ onExitMode, processes, onAddProcess, onDeleteProcess, on
         <div className="flex-1 flex gap-6 overflow-hidden">
             {/* ── Left Sidebar (Configuration) ────────────────────── */}
             <aside className="w-[320px] shrink-0 flex flex-col gap-6 overflow-y-auto pr-2">
+                
+                <div className={`neu-extruded p-4 rounded-[16px] ${phase === 'simulation' ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <AlgorithmSelector 
+                        selected={selectedAlgorithm} 
+                        onSelect={setSelectedAlgorithm} 
+                        allowedAlgorithms={["FCFS", "SJF", "SRTF"]} 
+                    />
+                </div>
+
                 <div className="neu-extruded p-5 rounded-[16px] flex-1">
                     <BurstSequenceBuilder
                         onAddProcess={onAddProcess}
